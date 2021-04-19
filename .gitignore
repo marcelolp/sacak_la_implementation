@@ -50,3 +50,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+# Debug/Temporary File List
+src/tmp.txt
