@@ -1,7 +1,5 @@
 #include "file_io.h"
 
-
-
 /*
 *  Determines the size of the file reference by the filepointer fp.
 */
@@ -52,8 +50,23 @@ char* file_read(FILE* fp) {
     return buffer;
 }
 
-int file_write(FILE* fp, const char* data_buffer) {return 0;}
+/*
+*  Writes the content of data_buffer interpreted as chars into the stream fp
+*/
+int file_write(FILE* fp, const char* data_buffer, size_t buffer_size) {
 
+    size_t num_written = fwrite(data_buffer, sizeof(char), buffer_size, fp);
+    if (num_written < buffer_size) {
+        perror("fwrite: ");
+        printf("Could only write %u chars", num_written);
+        exit(-1);
+    }
+    return 0;
+}
+
+/* 
+*   Closes the file fp
+*/
 int file_close(FILE* fp) {
     if (fclose(fp) != 0) {
         perror("fclose: ");

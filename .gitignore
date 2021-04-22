@@ -54,3 +54,4 @@ dkms.conf
 
 # Debug/Temporary File List
 src/tmp.txt
+.vscode
