@@ -30,26 +30,28 @@ int reset_time();
 
 /*
 *  Computes the Lyndon Array of t using two auxiliary arrays
+*  n is the size of t (includin the termination symbol)
 *  Returns a pointer to LA
 */
-char* sacak_la_two_aux(const char* t, const char* sa, size_t n);
+char* sacak_la_two_aux(const char* t, size_t n);
 
 /*
-*  Computes the Lyndon Array of t using one auxiliar array
+*  Computes the Lyndon Array of t using one auxiliary array
+*  n is the size of t (includin the termination symbol)
 *  Returns a pointer to LA
 */
-char* sacak_la_one_aux(const char* t, const char* sa, size_t n);
+char* sacak_la_one_aux(const char* t, size_t n);
 
 /*
 *  Computes the Lyndon Array of t without auxiliary arrays
+*  n is the size of t (includin the termination symbol)
 *  Returns a pointer to LA
 */
-char* sacak_la_inplace(const char* t, const char* sa, size_t n);
+char* sacak_la_inplace(const char* t, size_t n);
 
 /*
 *  Does the part of the computation of SA thats common between all sacak-la variants
 */
 int sacak_common(const char* t, const char* sa, const char* bkt, size_t n);
-
 
 #endif

@@ -3,6 +3,7 @@
 #include "file_io.h"
 #include "time_test.h"
 #include "sacak_la.h"
+#include "symbols.h"
 
 /* For now the only use of this function is debugging */
 int main() {
@@ -10,18 +11,24 @@ int main() {
     reset_time();
     start_time();
 
-    FILE* fp_test = file_open("tmp.txt", "r");
-    char* file_test = file_read(fp_test);
-
-    printf("%u\n", file_size(fp_test));
-    printf("%s\n", file_test);
     // Do something for >1-2ms to test timer
-    unsigned int j = 0;
-    for (int i = 0; i < 100000000; i++) {
-        j += i;
+    
+    FILE* file_alphabet = file_open("alphabet.txt", "r");
+    char* alphabet = file_read(file_alphabet);
+    size_t alphabet_size = file_size(file_alphabet);
+
+    printf("%s\n", alphabet);
+    printf("%u\n", alphabet_size);
+
+    set_alphabet(alphabet, alphabet_size);
+    char* proc_alphabet = get_alphabet();
+
+    for (int i = 0; i < 255; i++) {
+        printf("%hhi ", proc_alphabet[i]);
     }
-    // Output so j doesnt get optimized away
-    printf("%u\n", j);
+    printf("\n");
+
+    file_close(file_alphabet);
 
     stop_time();
     long int runtime = get_time();

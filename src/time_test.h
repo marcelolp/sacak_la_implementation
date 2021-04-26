@@ -20,4 +20,11 @@
 */
 float* compare_times(const char* t, size_t n);
 
+float run_two_aux(const char* t, size_t n);
+
+float run_one_aux(const char* t, size_t n);
+
+float run_inplace(const char* t, size_t n);
+
+
 #endif
