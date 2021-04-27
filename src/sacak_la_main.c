@@ -14,20 +14,27 @@ int main() {
     // Do something for >1-2ms to test timer
     
     FILE* file_alphabet = file_open("alphabet.txt", "r");
-    char* alphabet = file_read(file_alphabet);
+    unsigned char* alphabet = file_read(file_alphabet);
     size_t alphabet_size = file_size(file_alphabet);
 
     printf("%s\n", alphabet);
     printf("%u\n", alphabet_size);
 
     set_alphabet(alphabet, alphabet_size);
-    char* proc_alphabet = get_alphabet();
+    unsigned char* proc_alphabet = get_alphabet();
 
     for (int i = 0; i < 255; i++) {
-        printf("%hhi ", proc_alphabet[i]);
+        int index = proc_alphabet[i];
+        if (index < 0) {
+            continue;
+        }
+        printf("%c|", i);
+        printf("%hhi ", index);
+
     }
     printf("\n");
 
+    free_alphabet();
     file_close(file_alphabet);
 
     stop_time();

@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "symbols.h"
+
 long int sum_time;
 long int last_time;
 
@@ -31,27 +33,26 @@ int reset_time();
 /*
 *  Computes the Lyndon Array of t using two auxiliary arrays
 *  n is the size of t (includin the termination symbol)
+*  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-char* sacak_la_two_aux(const char* t, size_t n);
+unsigned char* sacak_la_two_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
 
 /*
 *  Computes the Lyndon Array of t using one auxiliary array
 *  n is the size of t (includin the termination symbol)
+*  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-char* sacak_la_one_aux(const char* t, size_t n);
+unsigned char* sacak_la_one_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
 
 /*
 *  Computes the Lyndon Array of t without auxiliary arrays
 *  n is the size of t (includin the termination symbol)
+*  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-char* sacak_la_inplace(const char* t, size_t n);
+unsigned char* sacak_la_inplace(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
 
-/*
-*  Does the part of the computation of SA thats common between all sacak-la variants
-*/
-int sacak_common(const char* t, const char* sa, const char* bkt, size_t n);
 
 #endif

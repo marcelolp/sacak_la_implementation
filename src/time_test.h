@@ -18,13 +18,13 @@
 *  2: sacak_la_one_aux
 *  3: sacak_la_inplace 
 */
-float* compare_times(const char* t, size_t n);
+float* compare_times(unsigned char* t, unsigned char * alphabet, size_t n, size_t a);
 
-float run_two_aux(const char* t, size_t n);
+float run_two_aux(unsigned char* t, unsigned char * alphabet, size_t n, size_t a);
 
-float run_one_aux(const char* t, size_t n);
+float run_one_aux(unsigned char* t, unsigned char * alphabet, size_t n, size_t a);
 
-float run_inplace(const char* t, size_t n);
+float run_inplace(unsigned char* t, unsigned char * alphabet, size_t n, size_t a);
 
 
 #endif

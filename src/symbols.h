@@ -8,16 +8,16 @@
 *  Contains functions to lexicographically compare symbols based on an alphabet
 */
 
-static char * alphabet;
+static unsigned char * alphabet;                                                                    // alphabet[c] = i is the lex. value i of the symbol 'c'
 static size_t a_size;
-static int ascii;                                                                                          // 1 if the ascii coding is to be used, 0 otherwise
+static int ascii;                                                                                   // 1 if the ascii coding is to be used, 0 otherwise
 
 /*
 *  Sets the alphabet as the string of symbols given by the pointer (symbols are expected to be 1 byte long)
 *  If the pointer is null, uses the order f symbols in the ascii encoding
 *  Returns -1 if the string is not usable as alphabet (duplicate symbols etc.)
 */
-void set_alphabet(const char* a, size_t a_size);
+void set_alphabet( unsigned char* a, size_t a_size);
 
 /*
 *  Deallocates the memory for the currently set alphabet to set a new one
@@ -35,12 +35,12 @@ char* get_alphabet();
 *  from i, j onward
 *  Returns 1 if the first string is lexicographically larger, 0 if they are equal and -1 otherwise
 */
-int lex_compare_strings(const char* a, const char* b);
+int lex_compare_strings( unsigned char* a,  unsigned char* b);
 
 /*
 *  Returns 1 if the first symbol a is lexicographically larger, 0 if they are equal and -1 otherwise
 */
-int lex_compare_symbols(char a, char b);
+int lex_compare_symbols(unsigned char a, unsigned char b);
 
 
 #endif
