@@ -36,7 +36,7 @@ int reset_time();
 *  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-unsigned char* sacak_la_two_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
+unsigned int* sacak_la_two_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
 
 /*
 *  Computes the Lyndon Array of t using one auxiliary array
@@ -44,7 +44,7 @@ unsigned char* sacak_la_two_aux(unsigned char* t, unsigned char* alphabet, size_
 *  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-unsigned char* sacak_la_one_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
+unsigned int* sacak_la_one_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
 
 /*
 *  Computes the Lyndon Array of t without auxiliary arrays
@@ -52,7 +52,18 @@ unsigned char* sacak_la_one_aux(unsigned char* t, unsigned char* alphabet, size_
 *  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-unsigned char* sacak_la_inplace(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
+unsigned int* sacak_la_inplace(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
 
+/*
+*  Computes the bucket array for an string s
+*  If head == 1, stores pointers to the head of the buckets, otherwise to the tails
+*/ 
+void get_bkt_array(unsigned char* t, unsigned int* bkt, unsigned char* alphabet, size_t n, size_t a, int head);
 
+/*
+*  Helper function for formatted output
+*/
+void print_bkt_array(unsigned int* bkt, size_t a, unsigned int pos);
+
+void print_suffix_array(unsigned int* sa, size_t n, unsigned int pos);
 #endif

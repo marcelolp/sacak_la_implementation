@@ -28,7 +28,12 @@ void free_alphabet();
 *  Returns the currently set alphabet.
 *  NULL if no alphabet is set
 */
-char* get_alphabet();
+unsigned char* get_alphabet();
+
+/*
+*  Returns the size of the alphabet sigma + 1
+*/
+size_t get_alphabet_size();
 
 /*
 *  the strings are expected to be terminated by /0 and to be called with &t1[i], &t2[j] to compare 

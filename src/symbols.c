@@ -48,6 +48,9 @@ unsigned char* get_alphabet(){
     return alphabet;
 }
 
+size_t get_alphabet_size(){
+    return alphabet_size;
+}
 
 int lex_compare_strings( unsigned char* a,  unsigned char* b) {
     int state = 0;

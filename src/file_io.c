@@ -29,7 +29,7 @@ FILE* file_open( unsigned char* dir,  unsigned char* mode) {
 unsigned char* file_read_d_term(FILE* fp) {
     size_t f_size = file_size(fp);
     
-    unsigned char* buffer = (unsigned char*) malloc((f_size + 2) * sizeof(unsigned char));                                     // buffer has size f_size+1 so that the termination symbols $0 can be added
+    unsigned char* buffer = (unsigned char*) malloc((f_size + 2) * sizeof(unsigned char));          // buffer has size f_size+2 so that the termination symbols $\0 can be added
     
     size_t num_read = fread(buffer, sizeof(unsigned char), f_size, fp);
     if (num_read < f_size) {
@@ -46,7 +46,7 @@ unsigned char* file_read_d_term(FILE* fp) {
 unsigned char* file_read(FILE* fp) {
     size_t f_size = file_size(fp);
     
-    unsigned char* buffer = (unsigned char*) malloc((f_size + 1) * sizeof(unsigned char));                                     // buffer has size f_size+1 so that the termination symbols $0 can be added
+    unsigned char* buffer = (unsigned char*) malloc((f_size + 1) * sizeof(unsigned char));          // buffer has size f_size+1 so that the termination symbols $\0 can be added
     
     size_t num_read = fread(buffer, sizeof(unsigned char), f_size, fp);
     if (num_read < f_size) {
@@ -59,7 +59,7 @@ unsigned char* file_read(FILE* fp) {
 }
 
 
-int file_write(FILE* fp,  unsigned char* data_buffer, size_t buffer_size) {
+int file_write(FILE* fp, unsigned char* data_buffer, size_t buffer_size) {
 
     size_t num_written = fwrite(data_buffer, sizeof(unsigned char), buffer_size, fp);
     if (num_written < buffer_size) {
