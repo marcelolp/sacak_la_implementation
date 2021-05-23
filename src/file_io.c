@@ -20,6 +20,7 @@ size_t file_size(FILE* fp) {
 FILE* file_open( unsigned char* dir,  unsigned char* mode) {
     FILE* fp = fopen(dir, mode);
     if (fp == 0) {                                                                                  // check for errors
+        perror("fopen: ");
         printf("Cannot open file %s \n", dir);
     }
     return fp;
@@ -34,7 +35,7 @@ unsigned char* file_read_d_term(FILE* fp) {
     size_t num_read = fread(buffer, sizeof(unsigned char), f_size, fp);
     if (num_read < f_size) {
         perror("fread: ");
-        printf("Could only read %u chars", num_read);
+        printf("Could only read %u chars\n", num_read);
         exit(-1);
     }
     buffer[f_size] = '$';

@@ -55,5 +55,5 @@ dkms.conf
 # Debug/Temporary File List
 src/tmp.txt
 .vscode
-.bin
-CMakeLists.txt
+bin
+build
