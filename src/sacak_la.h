@@ -36,7 +36,7 @@ int reset_time();
 *  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-unsigned int* sacak_la_two_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
+unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t n, size_t a);
 
 /*
 *  Computes the Lyndon Array of t using one auxiliary array
@@ -44,7 +44,7 @@ unsigned int* sacak_la_two_aux(unsigned char* t, unsigned char* alphabet, size_t
 *  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-unsigned int* sacak_la_one_aux(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
+unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t n, size_t a);
 
 /*
 *  Computes the Lyndon Array of t without auxiliary arrays
@@ -52,7 +52,7 @@ unsigned int* sacak_la_one_aux(unsigned char* t, unsigned char* alphabet, size_t
 *  a is the size of the alphabet
 *  Returns a pointer to LA
 */
-unsigned int* sacak_la_inplace(unsigned char* t, unsigned char* alphabet, size_t n, size_t a);
+unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t n, size_t a);
 
 
 #endif

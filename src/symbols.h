@@ -10,7 +10,7 @@
 
 static unsigned char * alphabet;                                                                    // alphabet[c] = i is the lex. value i of the symbol 'c'
 static size_t a_size;
-static int ascii;                                                                                   // 1 if the ascii coding is to be used, 0 otherwise
+int ascii;                                                                                          // 1 if the ascii coding is to be used, 0 otherwise
 
 /*
 *  Sets the alphabet as the string of symbols given by the pointer (symbols are expected to be 1 byte long)

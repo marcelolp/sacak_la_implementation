@@ -27,11 +27,18 @@ FILE* file_open( unsigned char* dir,  unsigned char* mode) {
 }
 
 
-unsigned char* file_read_d_term(FILE* fp) {
+unsigned int* file_read_d_term(FILE* fp) {
     size_t f_size = file_size(fp);
     
-    unsigned char* buffer = (unsigned char*) malloc((f_size + 2) * sizeof(unsigned char));          // buffer has size f_size+2 so that the termination symbols $\0 can be added
+    unsigned char* buffer = (unsigned char*) malloc((f_size + 2) * sizeof(unsigned char));             // buffer has size f_size+2 so that the termination symbols $\0 can be added
+    unsigned int* ibuffer = (unsigned int*) malloc((f_size + 2) * sizeof(unsigned int));
     
+    if (buffer == 0 || ibuffer == 0) {
+            perror("malloc: ");
+            printf("Could not allocate memory for file input\n");
+            exit(-1);
+        }
+
     size_t num_read = fread(buffer, sizeof(unsigned char), f_size, fp);
     if (num_read < f_size) {
         perror("fread: ");
@@ -40,7 +47,13 @@ unsigned char* file_read_d_term(FILE* fp) {
     }
     buffer[f_size] = '$';
     buffer[f_size + 1] = '\0';
-    return buffer;
+
+    for (int i = 0; i < f_size+2; i++) {
+        ibuffer[i] = (unsigned int) buffer[i];
+    }
+    free(buffer);
+
+    return ibuffer;
 }
 
 

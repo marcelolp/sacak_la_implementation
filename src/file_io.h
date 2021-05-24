@@ -24,7 +24,7 @@ FILE* file_open(unsigned char* dir, unsigned char* mode);
 *  A buffer will be returned with  size = (file_size+2)*byte_size.
 *  Position buffer[file_size] will be '$', position buffer[file_size + 1] will be '/0'
 */
-unsigned char* file_read_d_term(FILE* fp);
+unsigned int* file_read_d_term(FILE* fp);
 
 /*
 *  Reads the content of the file until EOF is reached.

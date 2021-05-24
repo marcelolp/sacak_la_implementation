@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     }
 
     FILE* file_text = file_open("src/tmp.txt", "r");
-    unsigned char* text = file_read_d_term(file_text);
+    unsigned int* text = file_read_d_term(file_text);
     size_t text_size = file_size(file_text) + 1; // $-symbol
 
     if (debug) {
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
         }
         printf("\n    ");
         for (int i = 0; i < text_size; i++) {
-            printf("%2c ", text[i]);
+            printf("%2u ", text[i]);
         }
         printf("\n");
     }
