@@ -587,16 +587,6 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned int* bkt, unsigned cha
             print_suffix_array(sa, n, n - n1);
         }
 
-        /*
-        // save the reduced string backwards into sa[n-n1-1..n] (such that the smallest symbol is the rightmost)
-        for (int i = 0; i < n1; i++) {
-            sa[n - i - 1] = sa[n1 + i];    
-            if (debug) {
-                print_suffix_array(sa, n, n - n1 + i);
-            } 
-        }
-        */
-
         // step 2.3: test if every character in t1 is unique
         int is_unique = (name_counter < n1) ? 0 : 1;
 
@@ -740,12 +730,12 @@ unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t 
         free(next);
         free(prev);
         free(bkt);
+
         sa = NULL;
         next = NULL;
         prev = NULL;
         bkt = NULL;
         la = NULL;
-
     	return la;
 }
 

@@ -1,8 +1,33 @@
 #include "test.h"
 
-/*
-*  Tests if an suffix array is correct, returns 0 if not, 1 otherwise
-*/
+unsigned int* gen_test_string(unsigned char* alphabet, size_t n, size_t a) {
+    unsigned int* text = (unsigned int*) malloc(n * sizeof(unsigned int));                       // bkt has size sigma + 1, sigma < 255
+    unsigned int* a_pointers = (unsigned int*) malloc((a-1) * sizeof(unsigned int));
+    if (text == 0 || a_pointers == 0) {
+        perror("malloc: ");
+        printf("Could not allocate memory for input\n");
+        exit(-1);
+    }
+
+    // get pointers to the used entries i alphabet
+    int j = 0;
+    for (int i = 0; i < 255; i++) {
+        if (i != '$' && alphabet[i] != 255) {
+            a_pointers[j] = i;
+            j++;
+        }
+    }
+
+    // generate a random character for each position
+    for (int i = 0; i < n; i++) {
+        int r = rand() % a;
+        text[i] = a_pointers[r];
+    }
+    text[n-1] = '$';
+    return text;
+}
+
+
 int test_suffix_array(unsigned int* t, unsigned int* sa, unsigned char* alphabet, size_t n, size_t a) {
     
     // initial fast test to look if all beginning characters are in lexicographical order
@@ -24,9 +49,7 @@ int test_suffix_array(unsigned int* t, unsigned int* sa, unsigned char* alphabet
     return 1;
 }
 
-/*
-*  Tests if an lyndon array is correct, returns 0 if not, 1 otherwise
-*/
+
 int test_lyndon_array(unsigned int* t, unsigned int* la, unsigned char* alphabet, size_t n, size_t a) {
 
     return 0;
