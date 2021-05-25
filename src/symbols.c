@@ -79,7 +79,7 @@ int lex_compare_symbols(unsigned char a, unsigned char b) {
     if (ascii) {                                                                                    // works for '$' too as it has lower value than every other (reasonable) symbol
         if (a > b) {
             return 1;
-        } else if (a = b) {
+        } else if (a == b) {
             return 0;
         } else {
             return -1;

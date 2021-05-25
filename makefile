@@ -10,7 +10,6 @@ SRCS = \
 	${DIR_SRC}/file_io.c \
 	${DIR_SRC}/symbols.c \
 	${DIR_SRC}/sacak_la.c \
-	${DIR_SRC}/time_test.c \
 	${DIR_SRC}/test.c
 
 all : generate move run

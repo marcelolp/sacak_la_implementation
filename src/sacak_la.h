@@ -6,29 +6,30 @@
 #include <time.h>
 
 #include "symbols.h"
+#include "test.h"
 
-long int sum_time;
-long int last_time;
+double sum_time;
+clock_t start_time;
 
 /*
 *  Returns the time variable 
 */
-long int get_time();
+double get_timer();
 
 /* 
 *  Starts the timer
 */
-int start_time();
+int start_timer();
 
 /*
 *  Stops the timer and adds the time passed since the last call of time_start() to the timer variable
 */
-int stop_time();
+int stop_timer();
 
 /*
 *  Resets the time variable to 0
 */
-int reset_time();
+int reset_timer();
 
 /*
 *  Computes the Lyndon Array of t using two auxiliary arrays

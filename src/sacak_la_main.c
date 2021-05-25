@@ -3,14 +3,13 @@
 #include "file_io.h"
 #include "sacak_la.h"
 #include "symbols.h"
-#include "time_test.h"
 #include "test.h"
 
 extern int debug;
 
 /* For now the only use of this function is debugging */
 int main(int argc, char** argv) {
-    debug = 1;      // TODO: read from cmd-args
+    debug = 0;      // TODO: read from cmd-args
 
 
     FILE* file_alphabet = file_open("src/alphabet.txt", "r");
@@ -50,18 +49,24 @@ int main(int argc, char** argv) {
         }
         printf("\n    ");
         for (int i = 0; i < text_size; i++) {
-            printf("%2u ", text[i]);
+            printf("%2c ", (char) text[i]);
         }
         printf("\n");
     }
+    unsigned int* la = NULL;
+    if (debug) {
+        la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
+        printf("\n\n");
+    }
+    
+    // still get the correct time, just run it again with correct output
+    debug = 0;
+    la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
+    double runtime = get_timer();
+    printf("Running time: %.4lf s\n", runtime);
+    printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+        (double) ((runtime / text_size) * (1000 * 1000)));
 
-    reset_time();
-    start_time();
-    unsigned int* la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
-    stop_time();
-    long int runtime = get_time();
-    printf("Running time: %li ms\n", runtime);
-    printf("Running time per input byte: %f ms\n", ((double) runtime / (double) text_size));
 
     /*
     if (test_lyndon_array(text, proc_alphabet, la, text_size, get_alphabet_size())) {
