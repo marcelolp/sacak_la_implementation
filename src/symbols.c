@@ -7,10 +7,11 @@ void set_alphabet( unsigned char* a, size_t a_size) {
     // Use the default alphabet
     if (!a) {                                                                                       
         ascii = 1;
+        return;
     }
     
     // Use alphabet a and insert termination symbol $ at lowest index
-    alphabet = (unsigned char*) malloc((256) * sizeof(int));                                                 // alphabet array has size 256
+    alphabet = (unsigned char*) malloc((256) * sizeof(unsigned char));                                                 // alphabet array has size 256
     if (!alphabet) {
         perror("malloc: ");
         printf("Could not allocate memory for alphabet array");
@@ -23,16 +24,16 @@ void set_alphabet( unsigned char* a, size_t a_size) {
     }
     alphabet_size = a_size + 1;
 
-    for (int i = 0; i < 255; i++) {                                                                 // initialize the array with -1
+    for (int i = 0; i <= 255; i++) {                                                                 // initialize the array with -1
         alphabet[i] = (unsigned char) 255;
     }
     alphabet['$'] = (unsigned char) 0;                                                                       // '$' has the lowest index
-    for (unsigned char i = 0; i < a_size; i++) {                                                             // overwrite the positions for which a symbol in the alphabet exists
+    for (int i = 0; i < a_size; i++) {                                                             // overwrite the positions for which a symbol in the alphabet exists
         if (a[i] > 255 || a[i] < 0) {
             printf("Symbol out of range 0-255 (should be 48-57, 65-90, 97-122)");
             exit(-1);
         }
-        alphabet[(int) a[i]] = (unsigned char) i+1;                                                          // alphabet['c'] := index(c), lower index means lower lex. value
+        alphabet[a[i]] = (unsigned char) i+1;                                                          // alphabet['c'] := index(c), lower index means lower lex. value
     }   
     ascii = 0;                                                                                       
 }
@@ -75,7 +76,7 @@ int lex_compare_strings( unsigned char* a,  unsigned char* b) {
     return -2;                                                                                      // should not happen but just in case
 }
 
-int lex_compare_symbols(unsigned char a, unsigned char b) {
+int lex_compare_symbols(unsigned int a, unsigned int b) {
     if (ascii) {                                                                                    // works for '$' too as it has lower value than every other (reasonable) symbol
         if (a > b) {
             return 1;
@@ -85,9 +86,9 @@ int lex_compare_symbols(unsigned char a, unsigned char b) {
             return -1;
         }
     } else {
-        if (alphabet[a] > alphabet[b]) {
+        if (alphabet[(unsigned char) a] > alphabet[(unsigned char) b]) {
             return 1;
-        } else if (alphabet[a] == alphabet[b]) {
+        } else if (alphabet[(unsigned char) a] == alphabet[(unsigned char) b]) {
             return 0;
         } else {
             return -1;

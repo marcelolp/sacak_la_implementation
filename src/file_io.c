@@ -37,7 +37,7 @@ unsigned int* file_read_d_term(FILE* fp) {
             perror("malloc: ");
             printf("Could not allocate memory for file input\n");
             exit(-1);
-        }
+    }
 
     size_t num_read = fread(buffer, sizeof(unsigned char), f_size, fp);
     if (num_read < f_size) {
@@ -68,7 +68,7 @@ unsigned char* file_read(FILE* fp) {
         printf("Could only read %u chars", num_read);
         exit(-1);
     }
-    buffer[f_size + 1] = '\0';
+    buffer[f_size] = (unsigned char) '\0';
     return buffer;
 }
 

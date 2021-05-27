@@ -8,8 +8,8 @@
 *  Contains functions to lexicographically compare symbols based on an alphabet
 */
 
-static unsigned char * alphabet;                                                                    // alphabet[c] = i is the lex. value i of the symbol 'c'
-static size_t a_size;
+unsigned char * alphabet;                                                                    // alphabet[c] = i is the lex. value i of the symbol 'c'
+size_t a_size;
 int ascii;                                                                                          // 1 if the ascii coding is to be used, 0 otherwise
 
 /*
@@ -45,7 +45,7 @@ int lex_compare_strings( unsigned char* a,  unsigned char* b);
 /*
 *  Returns 1 if the first symbol a is lexicographically larger, 0 if they are equal and -1 otherwise
 */
-int lex_compare_symbols(unsigned char a, unsigned char b);
+int lex_compare_symbols(unsigned int a, unsigned int b);
 
 
 #endif

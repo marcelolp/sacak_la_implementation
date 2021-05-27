@@ -6,11 +6,15 @@
 #include "test.h"
 
 extern int debug;
+extern int output;
 
 /* For now the only use of this function is debugging */
 int main(int argc, char** argv) {
-    debug = 1;      // TODO: read from cmd-args
-    int gen_input = 1;
+    debug = 0;      // TODO: read from cmd-args
+    output = 0;
+    int gen_input = 0;
+
+    printf("\nSACAK-LA: ----------------------------------------------------------------\n");
 
     FILE* file_alphabet = file_open("src/alphabet.txt", "r");
     unsigned char* alphabet = file_read(file_alphabet);
@@ -23,6 +27,7 @@ int main(int argc, char** argv) {
     }
 
     set_alphabet(alphabet, alphabet_size);
+    free(alphabet);
     unsigned char* proc_alphabet = get_alphabet();
 
     if (debug) {
@@ -38,7 +43,7 @@ int main(int argc, char** argv) {
     }
 
     unsigned int* text = NULL;
-    size_t text_size = 20;
+    size_t text_size = 0;
 
     if (gen_input) {
         text = gen_test_string(proc_alphabet, text_size, alphabet_size);
@@ -58,9 +63,9 @@ int main(int argc, char** argv) {
         for (int i = 0; i < text_size; i++) {
             printf("%2c ", (char) text[i]);
         }
-        printf("\n");
-    }
-    unsigned int* la = NULL;
+        printf("\n\n");
+    } 
+    unsigned int* la = NULL; 
     if (debug) {
         la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
@@ -74,21 +79,15 @@ int main(int argc, char** argv) {
     free(la);
     double runtime = get_timer();
     printf("Running time: %.4lf s\n", runtime);
-    printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-        (double) ((runtime / text_size) * (1000 * 1000)));
-
-
-    /*
-    if (test_lyndon_array(text, proc_alphabet, la, text_size, get_alphabet_size())) {
-        printf("Lyndon-Array is correct.");
+    if (runtime == .0f) {
+        printf("Running time too small to get accurate values for running time per input byte");
     } else {
-        printf("Lyndon-Array is incorrect.");
+        printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+            (double) ((runtime / text_size) * (1000 * 1000)));
     }
-    */
-    free(text);
-    free(alphabet);
-    free_alphabet();
 
+    free(text);
+    free_alphabet();
     return 0;
 
 }
