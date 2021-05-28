@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     }
 
     unsigned int* text = NULL;
-    size_t text_size = 0;
+    size_t text_size = 50;
 
     if (gen_input) {
         text = gen_test_string(proc_alphabet, text_size, alphabet_size);
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
         file_close(file_text);
     }
 
-    if (debug) {
+    if (output) {
         printf("\nT:  ");
         for (int i = 0; i < text_size; i++) {
             printf("%2i ", i);
@@ -65,7 +65,9 @@ int main(int argc, char** argv) {
         }
         printf("\n\n");
     } 
+
     unsigned int* la = NULL; 
+    /*
     if (debug) {
         la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
@@ -75,7 +77,27 @@ int main(int argc, char** argv) {
     
     // to still get the correct time, just run it again without any debug output
     debug = 0;
+    printf("Using two auxilliary arrays:\n");
     la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
+    free(la);
+    double runtime = get_timer();
+    printf("Running time: %.4lf s\n", runtime);
+    if (runtime == .0f) {
+        printf("Running time too small to get accurate values for running time per input byte");
+    } else {
+        printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+            (double) ((runtime / text_size) * (1000 * 1000)));
+    }
+    */
+    if (debug) {
+        la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
+        free(la);
+        la = NULL;
+        printf("\n\n");
+    }
+    debug = 0;
+    printf("Using one auxilliary array:\n");
+    la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
     free(la);
     double runtime = get_timer();
     printf("Running time: %.4lf s\n", runtime);
