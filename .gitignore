@@ -55,5 +55,5 @@ dkms.conf
 # Debug/Temporary File List
 .vscode
 bin
-src/tmp.txt
-src/alphabet.txt
+tmp.txt
+alphabet.txt

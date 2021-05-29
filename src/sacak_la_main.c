@@ -67,7 +67,8 @@ int main(int argc, char** argv) {
     } 
 
     unsigned int* la = NULL; 
-    /*
+    double runtime = 0;
+    
     if (debug) {
         la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
@@ -77,10 +78,10 @@ int main(int argc, char** argv) {
     
     // to still get the correct time, just run it again without any debug output
     debug = 0;
-    printf("Using two auxilliary arrays:\n");
+    printf("\nUsing two auxilliary arrays:\n");
     la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
     free(la);
-    double runtime = get_timer();
+    runtime = get_timer();
     printf("Running time: %.4lf s\n", runtime);
     if (runtime == .0f) {
         printf("Running time too small to get accurate values for running time per input byte");
@@ -88,7 +89,9 @@ int main(int argc, char** argv) {
         printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
             (double) ((runtime / text_size) * (1000 * 1000)));
     }
-    */
+    
+
+    
     if (debug) {
         la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
@@ -96,10 +99,30 @@ int main(int argc, char** argv) {
         printf("\n\n");
     }
     debug = 0;
-    printf("Using one auxilliary array:\n");
+    printf("\nUsing one auxilliary array:\n");
     la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
     free(la);
-    double runtime = get_timer();
+    runtime = get_timer();
+    printf("Running time: %.4lf s\n", runtime);
+    if (runtime == .0f) {
+        printf("Running time too small to get accurate values for running time per input byte");
+    } else {
+        printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+            (double) ((runtime / text_size) * (1000 * 1000)));
+    }
+    
+
+    if (debug) {
+        la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
+        free(la);
+        la = NULL;
+        printf("\n\n");
+    }
+    debug = 0;
+    printf("\nUsing no auxilliary array:\n");
+    la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
+    free(la);
+    runtime = get_timer();
     printf("Running time: %.4lf s\n", runtime);
     if (runtime == .0f) {
         printf("Running time too small to get accurate values for running time per input byte");

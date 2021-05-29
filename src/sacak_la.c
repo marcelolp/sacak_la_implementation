@@ -73,7 +73,7 @@ void print_lyndon_array(unsigned int* la, size_t n, unsigned int pos) {
     printf("LA:  [");
     for (int i = 0; i < n; i++) {
         if (la[i] == UINT_MAX) {
-            printf("  - ");
+            printf(" -1 ");
         } else {
             printf(" %3u", la[i]);
         }
@@ -845,6 +845,7 @@ unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t 
 
 
 unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t n, size_t a) {
+    
     // Memory allocation
         unsigned int* sa = (unsigned int*) malloc(n * sizeof(unsigned int));
         unsigned int* la = (unsigned int*) malloc(n * sizeof(unsigned int));
@@ -930,9 +931,97 @@ unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t 
         h = NULL;
         bkt = NULL;
     	return la;
-}     
-unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t n, size_t a) {
-    return 0;
+}
+
+
+
+unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t n, size_t a) { 
+        // Memory allocation
+        unsigned int* sa = (unsigned int*) malloc(n * sizeof(unsigned int));
+        unsigned int* la = (unsigned int*) malloc(n * sizeof(unsigned int));           
+        
+        if (sa == 0 || la == 0) {
+            perror("malloc: ");
+            printf("Could not allocate memory for la, sa\n");
+            exit(-1);
+        }
+
+        reset_timer();
+        start_timer();
+
+        int depthr = sacak_rec(t, sa, alphabet, n, a, 0, 0);
+
+        unsigned int* bkt = (unsigned int*) malloc(a * sizeof(unsigned int));                   
+        if (bkt == 0) {
+            perror("malloc: ");
+            printf("Could not allocate memory for bkt\n");
+            exit(-1);
+        }
+        
+        // initialize the next/prev/la-array
+        for (int i = 0; i < n; i++) {
+            la[i] = i+1;                                                                            // initialize like the next-array                                                                         
+        }
+
+        // step 3.3: Induce S-type suffixes and LA
+        if (debug) {
+            printf("Inducing Lyndon Array:\n");
+        }
+        get_bkt_array(t, bkt, alphabet, n, a, 0, 0);
+        for (int i = n-1; i >= 0; i--) {                                                            // right-to-left scan of t
+            if (sa[i] != UINT_MAX && sa[i] > 0 && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {  // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
+                sa[bkt[alphabet[ t[sa[i]-1] ]]] = sa[i] - 1;                                        // insert the suffix t[sa[i]-1] into the tail of its bucket
+                bkt[alphabet[ t[sa[i]-1 ] ]]--;                                                     // shift bucket tail pointer one position to the left
+            }
+
+            int j = sa[i];
+            if (j > 0) {                                                                            // identical to the version with one auxiliary array
+                unsigned int prev = (la[j-1] < j || la[j-1] == UINT_MAX) ? la[j-1] : j - 1;
+                unsigned int next = la[j];
+                la[next - 1] = prev;
+                if (prev != UINT_MAX) {                                                             // dont set the next-value for prev = -1
+                    la[prev] = next;
+                }
+            } else {
+                la[la[j] - 1] = UINT_MAX;                                                           // manually set the value if sa[i] = 0
+            }
+            
+            if (debug) {
+                print_suffix_array(sa, n, i);
+                print_lyndon_array(la, n, j);
+                printf("\n");
+            }
+        }                                                                                           // set the entry for the termination symbol
+
+        for (int i = 0; i < n; i++) {                                                               // single scan to compute la
+            la[i] = (la[i] < i || la[i] == UINT_MAX) ? 1 : la[i] - i;
+            if (debug) {
+                print_lyndon_array(la, n, i);
+            }
+        }
+
+        stop_timer();
+
+        // output the result
+        if (output) {
+            print_suffix_array(sa, n, -1);
+            print_lyndon_array(la, n, -1);
+        }
+
+        printf("Max. recursion depth=%i\n", depthr);
+
+        int test = test_suffix_array(t, sa, alphabet, n, a);
+        printf(test ? "Suffix array is correct\n" : "Suffix array is incorrect\n");
+        //test = test_lyndon_array(t, la, alphabet, n, a);                                          // doesnt work correctly atm
+         //printf(test ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
+
+        // Free memory (assuming sa is not of interest)
+        free(bkt);
+        free(sa);
+    
+        sa = NULL;
+        bkt = NULL;
+    	return la;
 }     
 
 
