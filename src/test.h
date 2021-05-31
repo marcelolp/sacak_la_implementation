@@ -2,6 +2,7 @@
 #define TEST_H
 
 #include <stdio.h>
+#include <time.h>
 
 #include "symbols.h"
 

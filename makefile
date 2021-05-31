@@ -1,6 +1,7 @@
 CC = cl
 
 DIR_SRC = src
+DIR_LIB = lib
 DIR_BIN = bin
 
 EXE_NAME = sacak_la_main.exe
@@ -12,7 +13,7 @@ SRCS = \
 	${DIR_SRC}/sacak_la.c \
 	${DIR_SRC}/test.c
 
-all : generate move run
+all : generate move
 
 generate :
 	$(CC) ${SRCS}

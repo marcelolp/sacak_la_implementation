@@ -17,7 +17,7 @@ size_t file_size(FILE* fp);
 /*
 *  Opens the file dir and returns garantueed non-zero filepointer fp to it.
 */
-FILE* file_open(unsigned char* dir, unsigned char* mode);
+FILE* file_open(const char* dir, const char* mode);
 
 /*
 *  Reads the content of the file until EOF is reached.

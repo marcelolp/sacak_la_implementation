@@ -17,7 +17,7 @@ size_t file_size(FILE* fp) {
 }
 
 
-FILE* file_open( unsigned char* dir,  unsigned char* mode) {
+FILE* file_open( const char* dir,  const char* mode) {
     FILE* fp = fopen(dir, mode);
     if (fp == 0) {                                                                                  // check for errors
         perror("fopen: ");

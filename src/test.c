@@ -53,8 +53,20 @@ int test_suffix_array(unsigned int* t, unsigned int* sa, unsigned char* alphabet
 
 int test_lyndon_array(unsigned int* t, unsigned int* la, unsigned char* alphabet, size_t n, size_t a) {
     
-    // go along la and check for every la[i] = l if there is a character in t[i..i+l] that is 
-    // smaller or equal to t[i]
+    // go along la and check if there is a rotation that is smaller than la[i..i+l] in that range
+    for (int i = 0; i < n; i++) {
+        if (i < n-1 && la[i] == 1) {                                                                           // check for L-type suffix
+            if (lex_compare_symbols(t[i], t[i+1]) < 0) {
+                return 0;
+            }
+        }
+        for (int l = 1; l < la[i]; l++) {
+            //
+        }
+
+    }
+
+
     for (int i = 0; i < n; i++) {
         int l = la[i];
         int s_block = 1;                                                                            // it is fine if the symbols directly right of t[i] are equal to t[i]         

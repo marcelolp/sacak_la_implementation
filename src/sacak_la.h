@@ -10,6 +10,8 @@
 
 double sum_time;
 clock_t start_time;
+size_t max_memory;
+size_t max_bkt_memory;
 
 /*
 *  Returns the time variable 
