@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
     size_t text_size = 50;
 
     if (gen_input) {
-        text = gen_test_string(proc_alphabet, text_size, alphabet_size);
+        text = gen_test_string(proc_alphabet, gen_input_len, alphabet_size);
     } else {
         FILE* file_text = file_open(input_file == NULL ? "../src/tmp.txt" : input_file, "r");
         text = file_read_d_term(file_text);
@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
         debug = 0;
     }
 
-    if (output) {
+    if (output || debug) {
         printf("\nT:  ");
         for (int i = 0; i < text_size; i++) {
             printf("%2i ", i);

@@ -469,7 +469,8 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         last_type = cur_type;
     }
     if (debug) {
-        printf("\n\n");       
+        printf("\n\n"); 
+        print_suffix_array(sa, n, -1);      
     }
 
     // step 1.2: induce L-type LMS-prefixes
