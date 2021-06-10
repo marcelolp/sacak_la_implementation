@@ -544,14 +544,12 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             }
             cur_lms_len++;                                                                          // include the next LMS-symbol as well
         }
-        printf("Length of LMS-factor %u is %u\n", cur_lms_pos, cur_lms_len);
 
         int is_different = 0;
         if (last_lms_len != cur_lms_len) {                                                          // both LMS-substrings are for sure different
             is_different = 1;
         } else {                                                                                    // compare which one is lexicographically larger
             for (int j = 0; j < cur_lms_len; j++) {
-                printf("Comparing %c to %c\n", t[cur_lms_pos + j], t[last_lms_pos + j]);
                 if (cur_lms_pos + j > n-1 || last_lms_pos + j > n-1) {                              // if one of the LMS-substrings ends with $ the first one has lower value
                     is_different = 1;
                     break;
@@ -727,6 +725,7 @@ unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t 
     max_memory = 0;
     max_bkt_memory = 0;
     max_memory += _msize(sa) + _msize(la) + _msize(next) + _msize(prev);
+    max_alphabet_memory = alphabet == NULL ? 0 : _msize(alphabet);
     if (_msize(bkt) > max_bkt_memory) {
         max_bkt_memory = _msize(bkt);
     }
@@ -785,8 +784,8 @@ unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t 
     //test = test_lyndon_array(t, la, alphabet, n, a);                                              // doesnt work correctly atm
         //printf(test ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
 
-    printf("Working space: %zu bytes + %zu bytes (bkt-array)\n", max_memory, max_bkt_memory);
-    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory) / (size_t) n);
+    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
+    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory + max_alphabet_memory) / (size_t) n);
 
     // Free memory (assuming sa is not of interest)
     free(bkt);
@@ -830,6 +829,7 @@ unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t 
     max_memory = 0;
     max_bkt_memory = 0;
     max_memory += _msize(sa) + _msize(la) + _msize(h);
+    max_alphabet_memory = alphabet == NULL ? 0 : _msize(alphabet);
     if (_msize(bkt) > max_bkt_memory) {
         max_bkt_memory = _msize(bkt);
     }
@@ -887,8 +887,8 @@ unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t 
     //test = test_lyndon_array(t, la, alphabet, n, a);                                              // doesnt work correctly atm
         //printf(test ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
 
-    printf("Working space: %zu bytes + %zu bytes (bkt-array)\n", max_memory, max_bkt_memory);
-    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory) / (size_t) n);
+    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
+    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory + max_alphabet_memory) / (size_t) n);
 
     // Free memory (assuming sa is not of interest)
     free(bkt);
@@ -929,6 +929,7 @@ unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t 
     max_memory = 0;
     max_bkt_memory = 0;
     max_memory += _msize(sa) + _msize(la);
+    max_alphabet_memory = alphabet == NULL ? 0 : _msize(alphabet);
     if (_msize(bkt) > max_bkt_memory) {
         max_bkt_memory = _msize(bkt);
     }
@@ -990,8 +991,8 @@ unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t 
     //test = test_lyndon_array(t, la, alphabet, n, a);                                              // doesnt work correctly atm
         //printf(test ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
 
-    printf("Working space: %zu bytes + %zu bytes (bkt-array)\n", max_memory, max_bkt_memory);
-    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory) / (size_t) n);
+    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
+    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory + max_alphabet_memory) / (size_t) n);
 
     // Free memory (assuming sa is not of interest)
     free(bkt);

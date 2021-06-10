@@ -1,14 +1,9 @@
 #include "symbols.h"
 
-alphabet_size = 0;                                                                                  // Not used atm
-ascii = 1; 
+int alphabet_size = 0;                                                                              // Not used atm
+int ascii = 1; 
 
 void set_alphabet( unsigned char* a, size_t a_size) {
-    // Use the default alphabet
-    if (!a) {                                                                                       
-        ascii = 1;
-        return;
-    }
     
     // Use alphabet a and insert termination symbol $ at lowest index
     alphabet = (unsigned char*) malloc((256) * sizeof(unsigned char));                                                 // alphabet array has size 256
@@ -18,22 +13,37 @@ void set_alphabet( unsigned char* a, size_t a_size) {
         exit(-1);
     }
     
+    // Use the default alphabet
+    if (a == NULL) {                                                                                       
+        ascii = 1; 
+        alphabet_size = 255;
+        int j = 1;
+        for (int i = 0; i < alphabet_size; i++) {                                                   // overwrite the positions for which a symbol in the alphabet exists
+            if (i != '$') {
+                alphabet[i] = (unsigned char) j;                                                    // alphabet['c'] := index(c), lower index means lower lex. value
+                j++;
+            }
+        }
+        alphabet['$'] = (unsigned char) 0;
+        return;
+    }
+    
     if (a_size > 255 - 1) {                                                                         // Reject the alphabet if it exceeds a size that can be stored in a (unsigned) byte
-        printf("Alphabet too big (should be at most 254) ");
+        printf("Alphabet too big (should be at most 254) ");                                        // since $ has to added 
         exit(-1);
     }
     alphabet_size = a_size + 1;
 
-    for (int i = 0; i <= 255; i++) {                                                                 // initialize the array with -1
+    for (int i = 0; i <= 255; i++) {                                                                // initialize the array with -1
         alphabet[i] = (unsigned char) 255;
     }
-    alphabet['$'] = (unsigned char) 0;                                                                       // '$' has the lowest index
-    for (int i = 0; i < a_size; i++) {                                                             // overwrite the positions for which a symbol in the alphabet exists
-        if (a[i] > 255 || a[i] < 0) {
-            printf("Symbol out of range 0-255 (should be 48-57, 65-90, 97-122)");
+    alphabet['$'] = (unsigned char) 0;                                                              // '$' has the lowest index
+    for (int i = 0; i < a_size; i++) {                                                              // overwrite the positions for which a symbol in the alphabet exists
+        if (a[i] > 255 || a[i] < 0 || a[i] == '$') {
+            printf("Symbol out of range 0-255 (should be 48-57, 65-90, 97-122) or $");
             exit(-1);
         }
-        alphabet[a[i]] = (unsigned char) i+1;                                                          // alphabet['c'] := index(c), lower index means lower lex. value
+        alphabet[a[i]] = (unsigned char) i+1;                                                       // alphabet['c'] := index(c), lower index means lower lex. value
     }   
     ascii = 0;                                                                                       
 }
@@ -43,9 +53,6 @@ void free_alphabet() {
 }
 
 unsigned char* get_alphabet(){
-    if(a_size = 0) {
-        return NULL;
-    }
     return alphabet;
 }
 

@@ -8,23 +8,23 @@
 extern int debug;
 extern int output;
 
-/* For now the only use of this function is debugging */
 int main(int argc, char** argv) {
 
     debug = 0;
     output = 0;
     int gen_input = 0;
     int gen_input_len = 0;
+    int mode = -1;
     const char* input_file = NULL;
     const char* alphabet_file = NULL;
 
     if (argc == 1) {
-        printf("Since no input file is specified, a default example will be used. For further information, use -h");
+        printf("Since no input file is specified, a default example will be used. For further information, use -h\n");
         output = 1;
     }
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] != '-') {
-            printf("Command line arguments have incorrect format, use -h for help");
+            printf("Command line arguments have incorrect format, use -h for help\n");
             exit(0);
         }
         char opt = argv[i][1];
@@ -37,10 +37,13 @@ int main(int argc, char** argv) {
                 printf("-d      : show debug output, not recommended for iputs larger than 500 byte\n");
                 printf("-o      : show the resulting array on the terminal\n");
                 printf("-g <arg>: generate input with size <arg> (integer)\n");
+                printf("-m <arg>: use only one algorithm (1 = inplace, 2 = single aux. array, 3 = two aux. array),\n");
+                printf("          default is all three algorithms\n");
+                printf("\nCombined options (eg. -doh) are not supported\n");
                 exit(0);
             case 'i' :                                                                              // i -> input file directory
                 if (i + 1 >= argc) {
-                    printf("Option -i needs a file path as parameter");
+                    printf("Option -i needs a file path as parameter\n");
                     exit(0);
                 }
                 input_file = argv[i+1];
@@ -48,7 +51,7 @@ int main(int argc, char** argv) {
                 break;
             case 'a' :                                                                              // a -> alphabet file directory
                 if (i + 1 >= argc) {
-                    printf("Option -a needs a file path as parameter");
+                    printf("Option -a needs a file path as parameter\n");
                     exit(0);
                 }
                 alphabet_file = argv[i+1];
@@ -68,24 +71,41 @@ int main(int argc, char** argv) {
                 gen_input = 1; 
                 i++;
                 break;
+            case 'm' :
+                if (i + 1 >= argc) {
+                    printf("Option -m needs a integer (1, 2, 3) as parameter\n");
+                    exit(0);
+                }
+                mode = atoi(argv[i+1]);
+                if (mode < -1 || mode == 0 || mode > 3) {
+                    printf("Argument for option m has invalid value\n");
+                    exit(0);
+                }
         }
         i++;
     }
 
     printf("\nSACAK-LA: ----------------------------------------------------------------\n");
 
-    FILE* file_alphabet = file_open(alphabet_file == NULL ? "../src/alphabet.txt" : alphabet_file, "r");
-    unsigned char* alphabet = file_read(file_alphabet);
-    size_t alphabet_size = file_size(file_alphabet);
-    file_close(file_alphabet);
+    size_t alphabet_size = 255;
+    if (alphabet_file != NULL) {
+        FILE* file_alphabet = file_open(alphabet_file == NULL ? "../src/alphabet.txt" : alphabet_file, "r");
+        unsigned char* alphabet = file_read(file_alphabet);
+        alphabet_size = file_size(file_alphabet);
+        file_close(file_alphabet);
+        set_alphabet(alphabet, alphabet_size);
+        free(alphabet);
+    } else {
+        set_alphabet(NULL, 255);
+    }
+
 
     if (debug) {
         printf("Alphabet in order: %s\n", alphabet);
         printf("Alphabet size: %u\n", alphabet_size);
     }
 
-    set_alphabet(alphabet, alphabet_size);
-    free(alphabet);
+
     unsigned char* proc_alphabet = get_alphabet();
 
     if (debug) {
@@ -132,69 +152,73 @@ int main(int argc, char** argv) {
     unsigned int* la = NULL; 
     double runtime = 0;
     
-    if (debug) {
-        la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
-        free(la);
-        la = NULL;
-        printf("\n\n");
-    }
-    
-    // to still get the correct time, just run it again without any debug output
-    debug = 0;
-    printf("\nUsing two auxilliary arrays:\n");
-    la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
-    free(la);
-    runtime = get_timer();
-    printf("Running time: %.4lf s\n", runtime);
-    if (runtime == .0f) {
-        printf("Running time too small to get accurate values for running time per input byte\n");
-    } else {
-        printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-            (double) ((runtime / text_size) * (1000 * 1000)));
-    }
+    if (mode == -1 || mode  == 1) {
+        if (debug) {
+            la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
+            free(la);
+            la = NULL;
+            printf("\n\n");
+        }
 
-    
-    if (debug) {
-        la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
-        free(la);
-        la = NULL;
-        printf("\n\n");
-    }
-    debug = 0;
-    printf("\nUsing one auxilliary array:\n");
-    la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
-    free(la);
-    runtime = get_timer();
-    printf("Running time: %.4lf s\n", runtime);
-    if (runtime == .0f) {
-        printf("Running time too small to get accurate values for running time per input byte\n");
-    } else {
-        printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-            (double) ((runtime / text_size) * (1000 * 1000)));
-    }
-    
-
-    if (debug) {
+        debug = 0;
+        printf("\nUsing no auxilliary array:\n");
         la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
-        la = NULL;
-        printf("\n\n");
+        runtime = get_timer();
+        printf("Running time: %.4lf s\n", runtime);
+        if (runtime == .0f) {
+            printf("Running time too small to get accurate values for running time per input byte\n");
+        } else {
+            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+                (double) ((runtime / text_size) * (1000 * 1000)));
+        }
     }
-    debug = 0;
-    printf("\nUsing no auxilliary array:\n");
-    la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
-    free(la);
-    runtime = get_timer();
-    printf("Running time: %.4lf s\n", runtime);
-    if (runtime == .0f) {
-        printf("Running time too small to get accurate values for running time per input byte\n");
-    } else {
-        printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-            (double) ((runtime / text_size) * (1000 * 1000)));
+
+    if (mode == -1 || mode  == 2) {
+        if (debug) {
+            la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
+            free(la);
+            la = NULL;
+            printf("\n\n");
+        }
+
+        debug = 0;
+        printf("\nUsing one auxilliary array:\n");
+        la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
+        free(la);
+        runtime = get_timer();
+        printf("Running time: %.4lf s\n", runtime);
+        if (runtime == .0f) {
+            printf("Running time too small to get accurate values for running time per input byte\n");
+        } else {
+            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+                (double) ((runtime / text_size) * (1000 * 1000)));
+        }
+    }
+
+    if (mode == -1 || mode  == 3) {
+        if (debug) {
+            la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
+            free(la);
+            la = NULL;
+            printf("\n\n");
+        }
+        
+        debug = 0;
+        printf("\nUsing two auxilliary arrays:\n");
+        la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
+        free(la);
+        runtime = get_timer();
+        printf("Running time: %.4lf s\n", runtime);
+        if (runtime == .0f) {
+            printf("Running time too small to get accurate values for running time per input byte\n");
+        } else {
+            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+                (double) ((runtime / text_size) * (1000 * 1000)));
+        }
     }
 
     free(text);
     free_alphabet();
     return 0;
-
 }
