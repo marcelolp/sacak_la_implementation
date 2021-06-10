@@ -246,25 +246,19 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                     cur_lms_len++;
                     j++;
                 }
-                if (sa[i] + j == n-1) {                                                             // reached the termination symbol
+                while(sa[i] + j < n && 
+                        lex_compare_symbols(t[sa[i] + j -1], t[sa[i] + j]) > -1) {                  // L-type-block to the left of the next LMS-symbol
                     cur_lms_len++;
-                } else {
-                    while(sa[i] + j < n && 
-                            lex_compare_symbols(t[sa[i] + j -1], t[sa[i] + j]) > -1) {              // L-type-block to the left of the next LMS-symbol
-                        cur_lms_len++;
-                        j++;
-                    }
-                    //if (sa[i]+j == n) {                                                           // add the termination symbol to the length if necessary
-                        cur_lms_len++;
-                    //}
+                    j++;
                 }
+                cur_lms_len++;                                                                      // include the next LMs-symbol as well
             }
 
             int is_different = 0;
             if (last_lms_len != cur_lms_len) {                                                      // both LMS-substrings are for sure different
                 is_different = 1;
             } else {                                                                                // compare which one is lexicographically larger
-                for (int j = 0; j <= cur_lms_len; j++) {
+                for (int j = 0; j < cur_lms_len; j++) {
                     if (cur_lms_pos + j > n-1 || last_lms_pos + j > n-1) {                          // if one of the LMS-substrings ends with $ the first one has lower value
                         is_different = 1;
                         break;
@@ -543,25 +537,21 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 cur_lms_len++;
                 j++;
             }
-            if (sa[i] + j == n-1) {                                                                 // reached the termination symbol
+            while(sa[i] + j < n && 
+                    lex_compare_symbols(t[sa[i] + j -1], t[sa[i] + j]) > -1) {                      // L-type-block to the left of the next LMS-symbol
                 cur_lms_len++;
-            } else {
-                while(sa[i] + j < n && 
-                        lex_compare_symbols(t[sa[i] + j -1], t[sa[i] + j]) > -1) {                  // L-type-block to the left of the next LMS-symbol
-                    cur_lms_len++;
-                    j++;
-                }
-                //if (sa[i]+j == n) {                                                               // add the termination symbol to the length if necessary
-                    cur_lms_len++;
-                //} 
+                j++;
             }
+            cur_lms_len++;                                                                          // include the next LMS-symbol as well
         }
+        printf("Length of LMS-factor %u is %u\n", cur_lms_pos, cur_lms_len);
 
         int is_different = 0;
         if (last_lms_len != cur_lms_len) {                                                          // both LMS-substrings are for sure different
             is_different = 1;
         } else {                                                                                    // compare which one is lexicographically larger
-            for (int j = 0; j <= cur_lms_len; j++) {
+            for (int j = 0; j < cur_lms_len; j++) {
+                printf("Comparing %c to %c\n", t[cur_lms_pos + j], t[last_lms_pos + j]);
                 if (cur_lms_pos + j > n-1 || last_lms_pos + j > n-1) {                              // if one of the LMS-substrings ends with $ the first one has lower value
                     is_different = 1;
                     break;
