@@ -37,6 +37,13 @@ int stop_timer();
 int reset_timer();
 
 /*
+*  Computes only the Suffix Array of t
+*  n is the size of t (includin the termination symbol)
+*  a is the size of the alphabet
+*/
+void sacak(unsigned int* t, unsigned char* alphabet, size_t n, size_t a);
+
+/*
 *  Computes the Lyndon Array of t using two auxiliary arrays
 *  n is the size of t (includin the termination symbol)
 *  a is the size of the alphabet

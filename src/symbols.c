@@ -1,7 +1,7 @@
 #include "symbols.h"
 
 int alphabet_size = 0;                                                                              // Not used atm
-int ascii = 1; 
+int ascii = 0; 
 
 void set_alphabet( unsigned char* a, size_t a_size) {
     
@@ -15,7 +15,6 @@ void set_alphabet( unsigned char* a, size_t a_size) {
     
     // Use the default alphabet
     if (a == NULL) {                                                                                       
-        ascii = 1; 
         alphabet_size = 255;
         int j = 1;
         for (int i = 0; i < alphabet_size; i++) {                                                   // overwrite the positions for which a symbol in the alphabet exists
@@ -44,8 +43,7 @@ void set_alphabet( unsigned char* a, size_t a_size) {
             exit(-1);
         }
         alphabet[a[i]] = (unsigned char) i+1;                                                       // alphabet['c'] := index(c), lower index means lower lex. value
-    }   
-    ascii = 0;                                                                                       
+    }                                                                                        
 }
 
 void free_alphabet() {

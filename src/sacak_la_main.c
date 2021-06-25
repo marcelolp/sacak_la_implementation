@@ -7,11 +7,13 @@
 
 extern int debug;
 extern int output;
+extern int test;
 
 int main(int argc, char** argv) {
 
-    debug = 0;
-    output = 0;
+    //debug = 0;
+    //output = 0;
+    //test = 0;
     int gen_input = 0;
     int gen_input_len = 0;
     int mode = -1;
@@ -34,11 +36,12 @@ int main(int argc, char** argv) {
                 printf("-h      : show this text\n");
                 printf("-i <arg>: specify the path <arg> to the input file\n");
                 printf("-a <arg>: specify the path <arg> to the alphabet file\n");
-                printf("-d      : show debug output, not recommended for iputs larger than 500 byte\n");
+                printf("-d      : show debug output, not recommended for inputs larger than 200 byte\n");
                 printf("-o      : show the resulting array on the terminal\n");
                 printf("-g <arg>: generate input with size <arg> (integer)\n");
-                printf("-m <arg>: use only one algorithm (1 = inplace, 2 = single aux. array, 3 = two aux. array),\n");
+                printf("-m <arg>: use only one algorithm (1 = inplace, 2 = single aux. array, 3 = two aux. array, 4 = sacak only),\n");
                 printf("          default is all three algorithms\n");
+                printf("-t      : test result (sa, la) for errors\n");
                 printf("\nCombined options (eg. -doh) are not supported\n");
                 exit(0);
             case 'i' :                                                                              // i -> input file directory
@@ -71,21 +74,26 @@ int main(int argc, char** argv) {
                 gen_input = 1; 
                 i++;
                 break;
-            case 'm' :
+            case 'm' :                                                                              // m -> select algorithm
                 if (i + 1 >= argc) {
                     printf("Option -m needs a integer (1, 2, 3) as parameter\n");
                     exit(0);
                 }
                 mode = atoi(argv[i+1]);
-                if (mode < -1 || mode == 0 || mode > 3) {
+                if (mode < -1 || mode == 0 || mode > 4) {
                     printf("Argument for option m has invalid value\n");
                     exit(0);
                 }
+                i++;
+                break;
+            case 't' :                                                                              // t -> test result
+                test = 1;
+                break;
+
         }
-        i++;
     }
 
-    printf("\nSACAK-LA: ----------------------------------------------------------------\n");
+    printf("\n---------------------------------------------------------------------------------\n");
 
     size_t alphabet_size = 255;
     if (alphabet_file != NULL) {
@@ -132,11 +140,6 @@ int main(int argc, char** argv) {
         file_close(file_text);
     }
 
-    if (text_size > 500) {
-        output = 0;
-        debug = 0;
-    }
-
     if (output || debug) {
         printf("\nT:  ");
         for (int i = 0; i < text_size; i++) {
@@ -151,7 +154,28 @@ int main(int argc, char** argv) {
 
     unsigned int* la = NULL; 
     double runtime = 0;
+    int debug_restore = debug;
     
+    if (mode  == 4) {
+        if (debug) {
+            sacak(text, proc_alphabet, text_size, get_alphabet_size());
+            printf("\n\n");
+        }
+
+        debug = 0;
+        printf("\nSacak only:\n");
+        sacak(text, proc_alphabet, text_size, get_alphabet_size());
+        runtime = get_timer();
+        printf("Running time: %.4lf s\n", runtime);
+        if (runtime == .0f) {
+            printf("Running time too small to get accurate values for running time per input byte\n");
+        } else {
+            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
+                (double) ((runtime / text_size) * (1000 * 1000)));
+        }
+        debug = debug_restore;
+    }
+
     if (mode == -1 || mode  == 1) {
         if (debug) {
             la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
@@ -172,6 +196,7 @@ int main(int argc, char** argv) {
             printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
                 (double) ((runtime / text_size) * (1000 * 1000)));
         }
+        debug = debug_restore;
     }
 
     if (mode == -1 || mode  == 2) {
@@ -194,6 +219,7 @@ int main(int argc, char** argv) {
             printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
                 (double) ((runtime / text_size) * (1000 * 1000)));
         }
+        debug = debug_restore;
     }
 
     if (mode == -1 || mode  == 3) {
@@ -216,6 +242,7 @@ int main(int argc, char** argv) {
             printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
                 (double) ((runtime / text_size) * (1000 * 1000)));
         }
+        debug = debug_restore;
     }
 
     free(text);

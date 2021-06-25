@@ -43,6 +43,10 @@ unsigned int* file_read_d_term(FILE* fp) {
     if (num_read < f_size) {
         perror("fread: ");
         printf("Could only read %u chars\n", num_read);
+        printf("Last chars read:\n");
+        for (int i = num_read >= 50 ? num_read - 50 : 0; i < num_read; i++) {
+            printf("%c", buffer[i]);
+        }
         exit(-1);
     }
     buffer[f_size] = '$';
