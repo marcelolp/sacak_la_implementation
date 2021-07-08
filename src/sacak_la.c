@@ -173,7 +173,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         if (debug) {
             printf("\n\n");   
             print_suffix_array(sa, n, 0);    
-        }
+        } 
 
         // step 1.2: induce L-type LMS-prefixes
         get_bkt_array(t, bkt, alphabet, n, a, 1, 1); 
@@ -190,7 +190,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                     print_suffix_array(sa, n, i);
                 }
             }
-        }
+        } 
 
 
         // step 1.3: induce S-type-prefixes
@@ -208,7 +208,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                     print_suffix_array(sa, n, i);
                 }
             }
-        }
+        } 
 
         // at this point SA[1..n] contains all sorted LMS-substrings (careful not LMS-suffixes)
         // step 2: rename every LMS-substring as an Integer and store the counter
@@ -237,44 +237,61 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         // create buckets in SA[0..n1-1] which store the number of appearances of an LMS-substring
         for (unsigned int i = 0; i < n1; i++) {
             unsigned int cur_lms_pos = sa[i];                                                                // for clarity
-            unsigned int cur_lms_len = 1;
-
+            unsigned int cur_lms_len = 0;
+           
             // get the length of the LMS-substring sa[i]
             // go to the right until t[sa[i] + j - 1] > t[sa[i] + j] -> len = j
             if (sa[i] != n-1) {                                                                         // LMS-substring $ has length 1
-                while(lex_compare_symbols(t[sa[i] + cur_lms_len - 1], t[sa[i] + cur_lms_len]) < 1) {    // search for the next LMS-type-symbol
+
+                while(sa[i] + cur_lms_len < n-1 && lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) < 1) {    // S-type block to the right of the LMS-symbol
                     cur_lms_len++;
                 }
-                //cur_lms_len++;                                                                          // include the next LMS-symbol as well
-            }
 
+                unsigned int last_switch = cur_lms_len;
+                while(sa[i] + cur_lms_len < n-1 && lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) > -1) {  // L-type block to the right of the LMS-symbol
+                    if (lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) > 0) {
+                        last_switch = cur_lms_len;
+                    }
+                    cur_lms_len++;
+                }
+                cur_lms_len = last_switch;
+
+                //while(lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) < 1) {    // search for the next LMS-type-symbol
+                //    cur_lms_len++;
+                //}
+                cur_lms_len++;                                                                          // include the next LMS-symbol as well
+            } else {
+                cur_lms_len = 1;
+            } 
+            //printf("LMS-SS at t[%u] has length %u", cur_lms_pos, cur_lms_len);
             int is_different = 0;
             if (last_lms_len != cur_lms_len) {                                                      // both LMS-substrings are for sure different
                 is_different = 1;
-            } else {                                                                                // compare which one is lexicographically larger
+            } else {                                                                                // compare if one is lexicographically larger
                 for (unsigned int j = 0; j < cur_lms_len; j++) {
-                    if (cur_lms_pos + j > n-1 || last_lms_pos + j > n-1) {                          // if one of the LMS-substrings ends with $ the first one has lower value
+                    if (cur_lms_pos + j == n-1 || last_lms_pos + j == n-1) {                          // if one of the LMS-substrings ends with $ the first one has lower value
                         is_different = 1;
                         break;
                     }
                     if (t[cur_lms_pos + j] != t[last_lms_pos + j]) {                                // if the LMS-substrings differ in a position the first has lower value
+                        //printf("Difference in t[%u] = %u != t[%u] = %u\n", cur_lms_pos + j, t[cur_lms_pos + j], last_lms_pos + j, t[last_lms_pos + j]);
                         is_different = 1;
                         break;
                     }
                 }
-            }
+            } 
 
 
             if (is_different) {                                                                     // create a new name
                 name_counter++;                                                                     // store the current position so it can be incremented if necessary
                 last_lms_pos = cur_lms_pos;                                                             
                 last_lms_len = cur_lms_len;    
-            }
+            } //printf(",   name assigned: %u different?: %u\n", name_counter-1, is_different);
             sa[n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2)] = name_counter - 1;   // store the names in SA[n1..n-1], fits since n1 < n/2   
             if (debug) {
                 print_suffix_array(sa, n, n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2));
             }                                                                   
-        }
+        } 
         
         // put the reduced string to the end of sa
         unsigned int j = n - 1;
@@ -290,6 +307,11 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         if (debug) {
                 print_suffix_array(sa, n, n - n1);
         }
+        
+        //printf("\n\nDepth: %u\n", depth);
+        //print_suffix_array(t, n, -1);
+        //print_suffix_array(sa, n, -1);
+
 
         // step 2.3: test if every character in t1 is unique
         int is_unique = (name_counter < n1) ? 0 : 1;
@@ -328,6 +350,11 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         }
         // suffix array of sa1 is now in sa[0..n1-1]
 
+        //printf("\n\nDepth: %u\n", depth);
+        //print_suffix_array(t, n, -1);
+        //print_suffix_array(sa, n, -1);
+
+        /*
         // check if the suffix array is correct
         for (unsigned int i = 1; i < n1; i++) {
             for (unsigned int j = sa1[i], k = sa1[i-1]; j < n1 && k < n1; j++, k++) {
@@ -336,12 +363,13 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 }
                 if (t1[j] < t1[k]) {
                     printf("Suffix array incorrect:\n");
-                    printf("%u: t[%u] = %u < t[%u] = %u\n", i, j, t1[j], k, t1[k]);
+                    printf("%u: t[%u] = %u < t[%u] = %u, beginning at %u, %u\n", i, j, t1[j], k, t1[k], sa1[i], sa1[i-1]);
                     exit(-1);
                 }
             }
         }
         printf("Suffix array correct\n");
+        */
 
         // step 3: induce sa from sa1
         // find pointers to the LMS-factors in t and store them in t1[0..n1-1]
@@ -535,27 +563,42 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
 
     for (int i = 0; i < n1; i++) {
         unsigned int cur_lms_pos = sa[i];                                                                    // for clarity
-        unsigned int cur_lms_len = 1;
+        unsigned int cur_lms_len = 0;
 
         // get the length of the LMS-substring sa[i]
-        // go to the right until t[sa[i] + j - 1] > t[sa[i] + j] -> len = j
         if (sa[i] != n-1) {                                                                         // LMS-substring $ has length 1
-            while(lex_compare_symbols(t[sa[i] + cur_lms_len - 1], t[sa[i] + cur_lms_len]) < 1) {    // search for the next LMS-type-symbol
+            while(sa[i] + cur_lms_len < n-1 && lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) < 1) {    // S-type block to the right of the LMS-symbol
                 cur_lms_len++;
             }
-            //cur_lms_len++;                                                                          // include the next LMS-symbol as well
+
+            unsigned int last_switch = cur_lms_len;
+            while(sa[i] + cur_lms_len < n-1 && lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) > -1) {  // L-type block to the right of the LMS-symbol
+                if (lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) > 0) {
+                    last_switch = cur_lms_len;
+                }
+                cur_lms_len++;
+            }
+            cur_lms_len = last_switch;
+
+            //while(lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) < 1) {    // search for the next LMS-type-symbol
+            //    cur_lms_len++;
+            //}
+            cur_lms_len++;                                                                          // include the next LMS-symbol as well
+        } else {
+            cur_lms_len = 1;
         }
-        
+        //printf("LMS-SS at t[%u] has length %u", cur_lms_pos, cur_lms_len);
         int is_different = 0;
         if (last_lms_len != cur_lms_len) {                                                          // both LMS-substrings are for sure different
             is_different = 1;
         } else {                                                                                    // compare which one is lexicographically larger
             for (unsigned int j = 0; j < cur_lms_len; j++) {
-                if (cur_lms_pos + j > n-1 || last_lms_pos + j > n-1) {                              // if one of the LMS-substrings ends with $ the first one has lower value
+                if (cur_lms_pos + j == n-1 || last_lms_pos + j == n-1) {                              // if one of the LMS-substrings ends with $ the first one has lower value
                     is_different = 1;
                     break;
                 }
                 if (t[cur_lms_pos + j] != t[last_lms_pos + j]) {                                    // if the LMS-substrings differ in a position the first has lower value
+                    //printf("Difference in t[%u] = %u != t[%u] = %u\n", cur_lms_pos + j, t[cur_lms_pos + j], last_lms_pos + j, t[last_lms_pos + j]);
                     is_different = 1;
                     break;
                 }
@@ -566,7 +609,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             name_counter++;                                                                         // store the current position so it can be incremented if necessary
             last_lms_pos = cur_lms_pos;                                                             
             last_lms_len = cur_lms_len;  
-        }
+        } //printf(",   name assigned: %u\n", name_counter-1);
         sa[n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2)] = name_counter - 1;   // store the names in SA[n1..n-1], fits since n1 < n/2     
         if (debug) {
             print_suffix_array(sa, n, n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2));
@@ -583,6 +626,10 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             j--;
         }
     }
+
+        //printf("\n\nDepth: %u\n", depth);
+        //print_suffix_array(t, n, -1);
+        //print_suffix_array(sa, n, -1);
 
     if (debug) {
         print_suffix_array(sa, n, n - n1);
@@ -612,9 +659,9 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         free(bkt);
         int temp = ascii;
         ascii = 1;                                                                                  // dont use the alphabet conversion for this part
-        depthr = sacak_rec(t1, sa1, alphabet, n1, name_counter, depth + 1);                     // n1 =: length of sa1, n1 =: length of t1
+        depthr = sacak_rec(t1, sa1, alphabet, n1, name_counter, depth + 1);                         // n1 =: length of sa1, n1 =: length of t1
         ascii = temp;                                                                               // enable it again
-
+        
         // Get the bucket array back
         bkt = (unsigned int*) malloc(a * sizeof(unsigned int));                   
             if (bkt == 0) {
@@ -627,6 +674,10 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         }
     }
     // suffix array of sa1 is now in sa[0..n1]
+
+        //printf("\n\nDepth: %u\n", depth);
+        //print_suffix_array(t, n, -1);
+        //print_suffix_array(sa, n, -1);
 
     // step 3: induce sa from sa1
     // find pointers to the LMS-substrings in t1 and store them in s1[0..n1]
@@ -690,7 +741,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
     }
 
     // step 3.3 is in the calling method
-    free(bkt);
+    free(bkt); printf("SACA-K done \n");
     // return max recursion depth
     return (depthr != 0 ? depthr : 0);
 }

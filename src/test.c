@@ -33,6 +33,9 @@ int test_suffix_array(unsigned int* t, unsigned int* sa, unsigned char* alphabet
 
     // compare the suffixes in sa one by one (can take O(n^2) time)
     for (unsigned int i = 1; i < n; i++) {
+        if (n > 100000 && i % (unsigned int) (n/log(n)*2) == 0) {                                                        // if n is big show that the program is making some progress
+            printf("%.2g %% of the suffix array tested\n", ((float) i/ (float)n)*(float)100);
+        }
         for (unsigned int j = sa[i], k = sa[i-1]; j < n && k < n; j++, k++) {
             if (alphabet[t[j]] > alphabet[t[k]]) {
                 break;

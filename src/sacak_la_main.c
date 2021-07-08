@@ -35,14 +35,14 @@ int main(int argc, char** argv) {
                 printf("\nFollowing options are implemented:\n");
                 printf("-h      : show this text\n");
                 printf("-i <arg>: specify the path <arg> to the input file\n");
-                printf("-a <arg>: specify the path <arg> to the alphabet file\n");
+                printf("-a <arg>: specify the path <arg> to the alphabet file if wanted, default is ascii\n");
                 printf("-d      : show debug output, not recommended for inputs larger than 200 byte\n");
-                printf("-o      : show the resulting array on the terminal\n");
-                printf("-g <arg>: generate input with size <arg> (integer)\n");
-                printf("-m <arg>: use only one algorithm (1 = inplace, 2 = single aux. array, 3 = two aux. array, 4 = sacak only),\n");
-                printf("          default is all three algorithms\n");
-                printf("-t      : test result (sa, la) for errors\n");
-                printf("\nCombined options (eg. -doh) are not supported\n");
+                printf("-o      : show the output on the terminal, not recommended for large inputs\n");
+                printf("-g <arg>: generate input with size <arg> (integer), only used for testing - might have bugs\n");
+                printf("-m <arg>: specify the algorithm (1 = inplace, 2 = single aux. array, 3 = two aux. array, 4 = sacak only),\n");
+                printf("          default is all three versions of SACA-K+LA\n");
+                printf("-t      : test result (sa, la) for correctness, may take a while for large inputs\n");
+                printf("\nCombined options (eg. -doh) do not work, they have to separated by spaces\n");
                 exit(0);
             case 'i' :                                                                              // i -> input file directory
                 if (i + 1 >= argc) {
@@ -131,6 +131,7 @@ int main(int argc, char** argv) {
     unsigned int* text = NULL;
     size_t text_size = 50;
 
+    // onyl for testing maybe remove?
     if (gen_input) {
         text = gen_test_string(proc_alphabet, gen_input_len, alphabet_size);
     } else {
@@ -163,7 +164,7 @@ int main(int argc, char** argv) {
         }
 
         debug = 0;
-        printf("\nSacak only:\n");
+        printf("\nSACA-K only:\n");
         sacak(text, proc_alphabet, text_size, get_alphabet_size());
         runtime = get_timer();
         printf("Running time: %.4lf s\n", runtime);
@@ -185,7 +186,7 @@ int main(int argc, char** argv) {
         }
 
         debug = 0;
-        printf("\nUsing no auxilliary array:\n");
+        printf("\nSACA-K+LA with no auxilliary array:\n");
         la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
         runtime = get_timer();
@@ -208,7 +209,7 @@ int main(int argc, char** argv) {
         }
 
         debug = 0;
-        printf("\nUsing one auxilliary array:\n");
+        printf("\nSACA-K+LA with one auxilliary array:\n");
         la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
         runtime = get_timer();
@@ -231,7 +232,7 @@ int main(int argc, char** argv) {
         }
         
         debug = 0;
-        printf("\nUsing two auxilliary arrays:\n");
+        printf("\nSACA-K+LA with two auxilliary arrays:\n");
         la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
         free(la);
         runtime = get_timer();
