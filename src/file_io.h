@@ -36,7 +36,7 @@ unsigned char* file_read(FILE* fp);
 /*
 *  Writes the content of data_buffer interpreted as chars into the stream fp
 */
-int file_write(FILE* fp, unsigned char* data_buffer, size_t data_size);
+int file_write(const char* dir, unsigned int* data_buffer, size_t data_size);
 
 /* 
 *   Closes the file fp

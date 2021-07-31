@@ -77,14 +77,23 @@ unsigned char* file_read(FILE* fp) {
 }
 
 
-int file_write(FILE* fp, unsigned char* data_buffer, size_t buffer_size) {
-
-    size_t num_written = fwrite(data_buffer, sizeof(unsigned char), buffer_size, fp);
-    if (num_written < buffer_size) {
-        perror("fwrite: ");
-        printf("Could only write %u chars", num_written);
+int file_write(const char* dir, unsigned int* data_buffer, size_t buffer_size) {
+    FILE* fp = fopen(dir, "wb");
+    if (fp == NULL) {
+        perror("fopen: ");
+        printf("Could not create file %s", dir);
         exit(-1);
     }
+    size_t written = 0;
+    for (unsigned int i  = 0; i < buffer_size; i++) {
+        written += fprintf(fp, "%u, ", data_buffer[i]);
+    }
+    if (written < buffer_size) {
+        perror("fwrite: ");
+        printf("Could only write %u chars", written);
+        exit(-1);
+    }
+    file_close(fp);
     return 0;
 }
 

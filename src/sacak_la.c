@@ -14,14 +14,8 @@ int start_timer() {
 }
 
 int stop_timer() {
-    /*
-    if (start_time == (clock_t) 0) {
-        printf("stop_time() call with no start_time() call before\n");
-        return -1;
-    }
-    */
     clock_t end_time = clock();
-    sum_time += (double) (end_time - start_time) / CLOCKS_PER_SEC;
+    sum_time += (double) (end_time - start_time) / CLOCKS_PER_SEC;                                  // scale to seconds
     start_time = 0;
     return 0;
     
@@ -86,6 +80,41 @@ void print_prev_array(unsigned int* prev, size_t n, unsigned int pos) {
 }
 
 /*
+ *  Prints out the working space and time measurements
+ */ 
+void print_results(unsigned int* t, unsigned int* la, unsigned int* sa, unsigned int n, unsigned int a, int depth) {
+    
+    if (output) {
+        print_suffix_array(sa, n, -1);
+        if (la != NULL) {
+            print_lyndon_array(la, n, -1);
+        }
+        printf("Max. recursion depth=%i\n", depth);
+    }
+
+    if (test) {
+        int test_res = test_suffix_array(t, sa, alphabet, n, a);
+        printf(test_res ? "Suffix array is correct\n" : "Suffix array is incorrect\n");
+        if (la != NULL) {
+            test_res = test_lyndon_array(t, la, alphabet, n, a);                                              
+            printf(test_res ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
+        }
+    }
+
+    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
+    printf("Working space per input byte: %.2lf bytes\n", (double)(max_memory + max_bkt_memory + max_alphabet_memory) / (double) n);
+    double runtime = get_timer();
+    printf("Running time: %.4lf s\n", runtime);
+    if (runtime == .0f) {
+        printf("Running time too small to get accurate values for running time per input byte\n");
+    } else {
+        printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / n) * 1000), 
+            (double) ((runtime / n) * (1000 * 1000)));
+    }
+
+}
+
+/*
 *  Computes the bucket array for an string t
 *  If head==1, stores pointers to the head of the buckets, otherwise to the tails
 *  If rec==1, takes the entries of t as their lex. values
@@ -120,11 +149,11 @@ void get_bkt_array(unsigned int* t, unsigned int* bkt, unsigned char* alphabet, 
 
 
 /*
-*  Recursively computes SA, intial call with depth=0, n1=0
+*  Recursively computes SA, intial call with depth=0, n=0
 */
 int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet, 
                 size_t n, size_t a, int depth) {
-    // Induced sorting of the LMS-type suffixes, algorithm published by Nong et al. in 
+    // Induced sorting of the LMS-type suffixes, based on the algorithm published by Nong et al. in 
     // "Two efficient algorithms for linear time suffixarray construction" (access with IEEE)
 
     // In the steps, the constant UINT_MAX will be used to represent -1 which is equivalent
@@ -147,14 +176,14 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             printf("0 is of type S");                                                               // always correct
         }
 
-        for(unsigned int i = 0; i < n; i++) {                                                                // initialize sa with zeroes
+        for(unsigned int i = 0; i < n; i++) {                                                       // initialize sa with zeroes
             sa[i] = UINT_MAX;
         }
         get_bkt_array(t, bkt, alphabet, n, a, 0, 1);                                                // get pointers to the end of the buckets
         int cur_type = 0;                                                                           
         int last_type = 1;                                                                          // t[n] = $ is S-type
-        //sa[bkt[ t[n-1] ]] = n-1;                                                                  // no need to shift bkt pointer
-        for (unsigned int i = n-2; i != UINT_MAX; i--) {                                                            // left to right scan of t                                                    
+        
+        for (unsigned int i = n-2; i != UINT_MAX; i--) {                                            // left to right scan of t                                                    
             cur_type = lex_compare_symbols(t[i], t[i+1]) == 0 ?                                     
                         (last_type ? 1 : 0) :                                                       // t[i] == t[i+1] -> depends on the type of t[i+1]
                         (lex_compare_symbols(t[i], t[i+1]) == 1 ? 0 : 1);                           // t[i] != t[i+1] -> direct comparison     
@@ -177,7 +206,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
 
         // step 1.2: induce L-type LMS-prefixes
         get_bkt_array(t, bkt, alphabet, n, a, 1, 1); 
-        for (unsigned int i = 0; i < n; i++) {                                                               // left-to-right scan of t
+        for (unsigned int i = 0; i < n; i++) {                                                      // left-to-right scan of t
             if (sa[i] == 0) { sa[i] = UINT_MAX; }
             if (sa[i] != UINT_MAX && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) > -1) {              // t[sa[i]-1] is L-type if t[sa[i]-1] >= t[sa[i]] 
                                                                                                     // since only the L-type block left of an LMS-type symbol is considered here 
@@ -195,7 +224,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
 
         // step 1.3: induce S-type-prefixes
         get_bkt_array(t, bkt, alphabet, n, a, 0, 1);
-        for (unsigned int i = n-1; i > 0; i--) {                                                             // right-to-left scan of t
+        for (unsigned int i = n-1; i > 0; i--) {                                                    // right-to-left scan of t
             if (sa[i] == 0) { sa[i] = UINT_MAX; }
             if (sa[i] != UINT_MAX && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {               // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
                                                                                                     // since only the S-type block right of an LMS-type symbol is considered here
@@ -214,7 +243,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         // step 2: rename every LMS-substring as an Integer and store the counter
 
         // step 2.1: put the LMS-substrings into SA[0..n1-1]
-        size_t n1 = 0;                                                                                 // n1 := |t1| -> #of LMs-substrngs in t
+        size_t n1 = 0;                                                                              // n1 := |t1| -> #of LMs-substrngs in t
         for (unsigned int i = 0; i < n; i++) {
             if (sa[i] != UINT_MAX) {
                 unsigned int temp = sa[i];
@@ -230,18 +259,18 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         }
 
         // step 2.2: compare the LMS-substrings, if they are different, the smaller ones get a lower value
-        unsigned int last_lms_pos = 0;                                                                       // int t not sa since that value will be  overidden !!!
+        unsigned int last_lms_pos = 0;                                                              // int t not sa since that value will be  overidden !!!
         unsigned int last_lms_len = 0;  
         unsigned int name_counter = 0;
 
         // create buckets in SA[0..n1-1] which store the number of appearances of an LMS-substring
         for (unsigned int i = 0; i < n1; i++) {
-            unsigned int cur_lms_pos = sa[i];                                                                // for clarity
+            unsigned int cur_lms_pos = sa[i];                                                       // for clarity
             unsigned int cur_lms_len = 0;
            
             // get the length of the LMS-substring sa[i]
             // go to the right until t[sa[i] + j - 1] > t[sa[i] + j] -> len = j
-            if (sa[i] != n-1) {                                                                         // LMS-substring $ has length 1
+            if (sa[i] != n-1) {                                                                     // LMS-substring $ has length 1
 
                 while(sa[i] + cur_lms_len < n-1 && lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) < 1) {    // S-type block to the right of the LMS-symbol
                     cur_lms_len++;
@@ -256,10 +285,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 }
                 cur_lms_len = last_switch;
 
-                //while(lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) < 1) {    // search for the next LMS-type-symbol
-                //    cur_lms_len++;
-                //}
-                cur_lms_len++;                                                                          // include the next LMS-symbol as well
+                cur_lms_len++;                                                                      // include the next LMS-symbol as well
             } else {
                 cur_lms_len = 1;
             } 
@@ -269,12 +295,11 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 is_different = 1;
             } else {                                                                                // compare if one is lexicographically larger
                 for (unsigned int j = 0; j < cur_lms_len; j++) {
-                    if (cur_lms_pos + j == n-1 || last_lms_pos + j == n-1) {                          // if one of the LMS-substrings ends with $ the first one has lower value
+                    if (cur_lms_pos + j == n-1 || last_lms_pos + j == n-1) {                        // if one of the LMS-substrings ends with $ the first one has lower value
                         is_different = 1;
                         break;
                     }
                     if (t[cur_lms_pos + j] != t[last_lms_pos + j]) {                                // if the LMS-substrings differ in a position the first has lower value
-                        //printf("Difference in t[%u] = %u != t[%u] = %u\n", cur_lms_pos + j, t[cur_lms_pos + j], last_lms_pos + j, t[last_lms_pos + j]);
                         is_different = 1;
                         break;
                     }
@@ -286,7 +311,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 name_counter++;                                                                     // store the current position so it can be incremented if necessary
                 last_lms_pos = cur_lms_pos;                                                             
                 last_lms_len = cur_lms_len;    
-            } //printf(",   name assigned: %u different?: %u\n", name_counter-1, is_different);
+            } 
             sa[n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2)] = name_counter - 1;   // store the names in SA[n1..n-1], fits since n1 < n/2   
             if (debug) {
                 print_suffix_array(sa, n, n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2));
@@ -344,41 +369,17 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 printf("Could not allocate memory for bkt\n");
                 exit(-1);
             }
-            if (_msize(bkt) > max_bkt_memory) {
-                max_bkt_memory = _msize(bkt);
-            }
         }
         // suffix array of sa1 is now in sa[0..n1-1]
-
-        //printf("\n\nDepth: %u\n", depth);
-        //print_suffix_array(t, n, -1);
-        //print_suffix_array(sa, n, -1);
-
-        /*
-        // check if the suffix array is correct
-        for (unsigned int i = 1; i < n1; i++) {
-            for (unsigned int j = sa1[i], k = sa1[i-1]; j < n1 && k < n1; j++, k++) {
-                if (t1[j] > t1[k]) {
-                    break;
-                }
-                if (t1[j] < t1[k]) {
-                    printf("Suffix array incorrect:\n");
-                    printf("%u: t[%u] = %u < t[%u] = %u, beginning at %u, %u\n", i, j, t1[j], k, t1[k], sa1[i], sa1[i-1]);
-                    exit(-1);
-                }
-            }
-        }
-        printf("Suffix array correct\n");
-        */
 
         // step 3: induce sa from sa1
         // find pointers to the LMS-factors in t and store them in t1[0..n1-1]
         get_bkt_array(t, bkt, alphabet, n, a, 0, 1);                                                // get pointers to the end of the buckets 
-        for (unsigned int i = 0; i < n1; i++) t1[i] = UINT_MAX;                                              // clean t1
+        for (unsigned int i = 0; i < n1; i++) t1[i] = UINT_MAX;                                     // clean t1
         j = n1-1;
         cur_type = 0;                                                                           
         last_type = 1;                                                                              // t[n] = $ is S-type
-        for (unsigned int i = n-2; i != UINT_MAX; i--) {                                                            // left to right scan of t                                                    
+        for (unsigned int i = n-2; i != UINT_MAX; i--) {                                            // left to right scan of t                                                    
             cur_type = lex_compare_symbols(t[i], t[i+1]) == 0 ?                                     
                         (last_type ? 1 : 0) :                                                       // t[i] == t[i+1] -> depends on the type of t[i+1]
                         (lex_compare_symbols(t[i], t[i+1]) == 1 ? 0 : 1);                           // t[i] != t[i+1] -> direct comparison     
@@ -433,7 +434,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         }
         // step 3.3: Induce S-type suffixes
         get_bkt_array(t, bkt, alphabet, n, a, 0, 1);
-        for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                             // right-to-left scan of t
+        for (unsigned int i = n-1; i != UINT_MAX; i--) {                                            // right-to-left scan of t
             if (sa[i] != UINT_MAX && sa[i] > 0 && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {  // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
                                                                                                     // since only the S-type block right of an LMS-type symbol is considered here
                 sa[bkt[ t[sa[i]-1] ]] = sa[i] - 1;                                                  // insert the suffix t[sa[i]-1] into the tail of its bucket
@@ -463,6 +464,8 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         printf("Could not allocate memory for bkt\n");
         exit(-1);
     }
+
+    max_bkt_memory = 0;
     if (_msize(bkt) > max_bkt_memory) {
         max_bkt_memory = _msize(bkt);
     }
@@ -482,7 +485,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
     int cur_type = 0;
     int last_type = 1;                                                                              // t[n] = $ is S-type
     //sa[bkt[alphabet[ t[n-1] ]]] = n-1;                                                            // no need to shift bkt pointer
-    for (unsigned int i = n-2; i != UINT_MAX; i--) {                                                                // left to right scan of t                                                    
+    for (unsigned int i = n-2; i != UINT_MAX; i--) {                                                // left to right scan of t                                                    
         cur_type = lex_compare_symbols(t[i], t[i+1]) == 0 ?                                     
                     (last_type ? 1 : 0) :                                                           // t[i] == t[i+1] -> depends on the type of t[i+1]
                     (lex_compare_symbols(t[i], t[i+1]) == 1 ? 0 : 1);                               // t[i] != t[i+1] -> direct comparison     
@@ -507,8 +510,8 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
 
     // step 1.2: induce L-type LMS-prefixes
     get_bkt_array(t, bkt, alphabet, n, a, 1, 0);
-    for (unsigned int i = 0; i < n; i++) {                                                                   // left-to-right scan of t
-        if (sa[i] != UINT_MAX && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) > -1) { // t[sa[i]-1] is L-type if t[sa[i]-1] >= t[sa[i]] 
+    for (unsigned int i = 0; i < n; i++) {                                                          // left-to-right scan of t
+        if (sa[i] != UINT_MAX && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) > -1) {                  // t[sa[i]-1] is L-type if t[sa[i]-1] >= t[sa[i]] 
                                                                                                     // since only the L-type block left of an LMS-type symbol is considered here
             if (sa[i]-1 != 0) {                                                                     // skipping zero since it cant be lms anyways
                 sa[bkt[alphabet[ t[sa[i]-1] ]]] = sa[i] - 1;                                        // insert the suffix t[sa[i]-1] into the head of its bucket
@@ -523,7 +526,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
 
     // step 1.3: induce S-type-prefixes
     get_bkt_array(t, bkt, alphabet, n, a, 0, 0);
-    for (unsigned int i = n-1; i > 0; i--) {                                                                 // right-to-left scan of t
+    for (unsigned int i = n-1; i > 0; i--) {                                                        // right-to-left scan of t
         if (sa[i] != UINT_MAX && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {                   // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
                                                                                                     // since only the S-type block right of an LMS-type symbol is considered here
             if (sa[i]-1 != 0) {                                                                     // skipping zero since it cant be lms anyways
@@ -541,7 +544,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
     // step 2: rename every LMS-substring as an Integer and store the counter
 
     // step 2.1: put the LMS-substrings into SA[0..n1-1]
-    size_t n1 = 0;                                                                                     // n1 := |t1| -> #of LMs-substrngs in t
+    size_t n1 = 0;                                                                                   // n1 := |t1| -> #of LMs-substrngs in t
     for (unsigned int i = 0; i < n; i++) {
         if (sa[i] != UINT_MAX) {
             unsigned int temp = sa[i];
@@ -557,12 +560,12 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
     }
 
     // step 2.2: compare the LMS-substrings, if they are different, the smaller ones get a lower value
-    unsigned int last_lms_pos = 0;                                                                           // in t not sa since that value will be overidden !!!
+    unsigned int last_lms_pos = 0;                                                                  // in t not sa since that value will be overidden !!!
     unsigned int last_lms_len = 0;     
     unsigned int name_counter = 0;
 
     for (int i = 0; i < n1; i++) {
-        unsigned int cur_lms_pos = sa[i];                                                                    // for clarity
+        unsigned int cur_lms_pos = sa[i];                                                           // for clarity
         unsigned int cur_lms_len = 0;
 
         // get the length of the LMS-substring sa[i]
@@ -579,10 +582,6 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 cur_lms_len++;
             }
             cur_lms_len = last_switch;
-
-            //while(lex_compare_symbols(t[sa[i] + cur_lms_len], t[sa[i] + cur_lms_len + 1]) < 1) {    // search for the next LMS-type-symbol
-            //    cur_lms_len++;
-            //}
             cur_lms_len++;                                                                          // include the next LMS-symbol as well
         } else {
             cur_lms_len = 1;
@@ -593,12 +592,11 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             is_different = 1;
         } else {                                                                                    // compare which one is lexicographically larger
             for (unsigned int j = 0; j < cur_lms_len; j++) {
-                if (cur_lms_pos + j == n-1 || last_lms_pos + j == n-1) {                              // if one of the LMS-substrings ends with $ the first one has lower value
+                if (cur_lms_pos + j == n-1 || last_lms_pos + j == n-1) {                            // if one of the LMS-substrings ends with $ the first one has lower value
                     is_different = 1;
                     break;
                 }
                 if (t[cur_lms_pos + j] != t[last_lms_pos + j]) {                                    // if the LMS-substrings differ in a position the first has lower value
-                    //printf("Difference in t[%u] = %u != t[%u] = %u\n", cur_lms_pos + j, t[cur_lms_pos + j], last_lms_pos + j, t[last_lms_pos + j]);
                     is_different = 1;
                     break;
                 }
@@ -609,7 +607,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             name_counter++;                                                                         // store the current position so it can be incremented if necessary
             last_lms_pos = cur_lms_pos;                                                             
             last_lms_len = cur_lms_len;  
-        } //printf(",   name assigned: %u\n", name_counter-1);
+        } 
         sa[n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2)] = name_counter - 1;   // store the names in SA[n1..n-1], fits since n1 < n/2     
         if (debug) {
             print_suffix_array(sa, n, n1 + ((cur_lms_pos % 2 == 0) ? (cur_lms_pos / 2) : (cur_lms_pos - 1) / 2));
@@ -626,10 +624,6 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             j--;
         }
     }
-
-        //printf("\n\nDepth: %u\n", depth);
-        //print_suffix_array(t, n, -1);
-        //print_suffix_array(sa, n, -1);
 
     if (debug) {
         print_suffix_array(sa, n, n - n1);
@@ -669,9 +663,6 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             printf("Could not allocate memory for bkt\n");
             exit(-1);
         }
-        if (_msize(bkt) > max_bkt_memory) {
-            max_bkt_memory = _msize(bkt);
-        }
     }
     // suffix array of sa1 is now in sa[0..n1]
 
@@ -687,7 +678,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
     j = n1-1;
     cur_type = 0;                                                                           
     last_type = 1;                                                                                  // t[n] = $ is S-type
-    for (unsigned int i = n-2; i != UINT_MAX; i--) {                                                                // left to right scan of t                                                    
+    for (unsigned int i = n-2; i != UINT_MAX; i--) {                                                // left to right scan of t                                                    
         cur_type = lex_compare_symbols(t[i], t[i+1]) == 0 ?                                     
                     (last_type ? 1 : 0) :                                                           // t[i] == t[i+1] -> depends on the type of t[i+1]
                     (lex_compare_symbols(t[i], t[i+1]) == 1 ? 0 : 1);                               // t[i] != t[i+1] -> direct comparison     
@@ -741,7 +732,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
     }
 
     // step 3.3 is in the calling method
-    free(bkt); printf("SACA-K done \n");
+    free(bkt);
     // return max recursion depth
     return (depthr != 0 ? depthr : 0);
 }
@@ -779,7 +770,6 @@ void sacak(unsigned int* t, unsigned char* alphabet, size_t n, size_t a) {
     }
 
     max_memory = 0;
-    max_bkt_memory = 0;
     max_memory += _msize(sa);
     max_alphabet_memory = alphabet == NULL ? 0 : _msize(alphabet);
     if (_msize(bkt) > max_bkt_memory) {
@@ -787,7 +777,7 @@ void sacak(unsigned int* t, unsigned char* alphabet, size_t n, size_t a) {
     }
 
     get_bkt_array(t, bkt, alphabet, n, a, 0, 0);
-    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                                // right-to-left scan of t
+    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                // right-to-left scan of t
         if (sa[i] != UINT_MAX && sa[i] > 0 && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {      // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
             sa[bkt[alphabet[ t[sa[i]-1] ]]] = sa[i] - 1;                                            // insert the suffix t[sa[i]-1] into the tail of its bucket
             bkt[alphabet[ t[sa[i]-1 ] ]]--;                                                         // shift bucket tail pointer one position to the left
@@ -797,24 +787,9 @@ void sacak(unsigned int* t, unsigned char* alphabet, size_t n, size_t a) {
         }
     }
 
-    stop_timer();
+    stop_timer();                                                                                   // everything below is not part of the algorithm
 
-    // output the result
-    if (output) {
-        print_suffix_array(sa, n, -1);
-    }
-
-    if (output) {
-        printf("Max. recursion depth=%i\n", depthr);
-    }
-
-    if (test) {
-        int test_res = test_suffix_array(t, sa, alphabet, n, a);
-        printf(test_res ? "Suffix array is correct\n" : "Suffix array is incorrect\n");
-    }
-
-    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
-    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory + max_alphabet_memory) / (size_t) n);
+    print_results(t, NULL, sa, n, a, depthr);
 
     // Free memory
     free(sa);
@@ -851,7 +826,6 @@ unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t 
     }
 
     max_memory = 0;
-    max_bkt_memory = 0;
     max_memory += _msize(sa) + _msize(la) + _msize(next) + _msize(prev);
     max_alphabet_memory = alphabet == NULL ? 0 : _msize(alphabet);
     if (_msize(bkt) > max_bkt_memory) {
@@ -870,7 +844,7 @@ unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t 
         printf("Inducing Lyndon Array:\n");
     }
     get_bkt_array(t, bkt, alphabet, n, a, 0, 0);
-    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                                // right-to-left scan of t
+    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                // right-to-left scan of t
         if (sa[i] != UINT_MAX && sa[i] > 0 && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {      // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
             sa[bkt[alphabet[ t[sa[i]-1] ]]] = sa[i] - 1;                                            // insert the suffix t[sa[i]-1] into the tail of its bucket
             bkt[alphabet[ t[sa[i]-1 ] ]]--;                                                         // shift bucket tail pointer one position to the left
@@ -897,27 +871,9 @@ unsigned int* sacak_la_two_aux(unsigned int* t, unsigned char* alphabet, size_t 
     }                                                                                               // set the entry for the termination symbol
 
 
-    stop_timer();
+    stop_timer();                                                                                   // everything below is not part of the algorithm
 
-    // output the result
-    if (output) {
-        print_suffix_array(sa, n, -1);
-        print_lyndon_array(la, n, -1);
-    }
-
-    if (output) {
-        printf("Max. recursion depth=%i\n", depthr);
-    }
-
-    if (test) {
-        int test_res = test_suffix_array(t, sa, alphabet, n, a);
-        printf(test_res ? "Suffix array is correct\n" : "Suffix array is incorrect\n");
-        test_res = test_lyndon_array(t, la, alphabet, n, a);                                              
-        printf(test_res ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
-    }
-
-    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
-    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory + max_alphabet_memory) / (size_t) n);
+    print_results(t, la, sa, n, a, depthr);
 
     // Free memory
     free(prev);
@@ -957,7 +913,6 @@ unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t 
     }
 
     max_memory = 0;
-    max_bkt_memory = 0;
     max_memory += _msize(sa) + _msize(la) + _msize(h);
     max_alphabet_memory = alphabet == NULL ? 0 : _msize(alphabet);
     if (_msize(bkt) > max_bkt_memory) {
@@ -975,7 +930,7 @@ unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t 
         printf("Inducing Lyndon Array:\n");
     }
     get_bkt_array(t, bkt, alphabet, n, a, 0, 0);
-    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                                // right-to-left scan of t
+    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                // right-to-left scan of t
         if (sa[i] != UINT_MAX && sa[i] > 0 && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {      // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
             sa[bkt[alphabet[ t[sa[i]-1] ]]] = sa[i] - 1;                                            // insert the suffix t[sa[i]-1] into the tail of its bucket
             bkt[alphabet[ t[sa[i]-1 ] ]]--;                                                         // shift bucket tail pointer one position to the left
@@ -987,7 +942,7 @@ unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t 
             unsigned int prev = la[j-1] == 0 ? j - 1 : h[j - 1];
             unsigned int next = h[j];
             h[next - 1] = prev;
-            if (prev != UINT_MAX) {                                                                        // dont set the next value if prev = -1
+            if (prev != UINT_MAX) {                                                                 // dont set the next value if prev = -1
                 h[prev] = next;
             }
         } else {                                                                                    // only need to set the prev info to -1
@@ -1004,27 +959,9 @@ unsigned int* sacak_la_one_aux(unsigned int* t, unsigned char* alphabet, size_t 
     }                                                                                               // set the entry for the termination symbol
 
 
-    stop_timer();
+    stop_timer();                                                                                   // everything below is not part of the algorithm
 
-    // output the result
-    if (output) {
-        print_suffix_array(sa, n, -1);
-        print_lyndon_array(la, n, -1);
-    }
-
-    if (output) {
-        printf("Max. recursion depth=%i\n", depthr);
-    }
-
-    if (test) {
-        int test_res = test_suffix_array(t, sa, alphabet, n, a);
-        printf(test_res ? "Suffix array is correct\n" : "Suffix array is incorrect\n");
-        test_res = test_lyndon_array(t, la, alphabet, n, a);                                              
-        printf(test_res ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
-    }
-
-    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
-    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory + max_alphabet_memory) / (size_t) n);
+    print_results(t, la, sa, n, a, depthr);
 
     // Free memory
     free(bkt);
@@ -1063,7 +1000,6 @@ unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t 
     } 
 
     max_memory = 0;
-    max_bkt_memory = 0;
     max_memory += _msize(sa) + _msize(la);
     max_alphabet_memory = alphabet == NULL ? 0 : _msize(alphabet);
     if (_msize(bkt) > max_bkt_memory) {
@@ -1080,7 +1016,7 @@ unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t 
         printf("Inducing Lyndon Array:\n");
     }
     get_bkt_array(t, bkt, alphabet, n, a, 0, 0);
-    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                                // right-to-left scan of t
+    for (unsigned int i = n-1; i != UINT_MAX; i--) {                                                // right-to-left scan of t
         if (sa[i] != UINT_MAX && sa[i] > 0 && lex_compare_symbols(t[sa[i]-1], t[sa[i]]) < 1) {      // t[sa[i]-1] is s-type if t[sa[i]-1] <= t[sa[i]] 
             sa[bkt[alphabet[ t[sa[i]-1] ]]] = sa[i] - 1;                                            // insert the suffix t[sa[i]-1] into the tail of its bucket
             bkt[alphabet[ t[sa[i]-1 ] ]]--;                                                         // shift bucket tail pointer one position to the left
@@ -1105,34 +1041,16 @@ unsigned int* sacak_la_inplace(unsigned int* t, unsigned char* alphabet, size_t 
         }
     }                                                                                               // set the entry for the termination symbol
 
-    for (unsigned int i = 0; i < n; i++) {                                                                   // single scan to compute la
+    for (unsigned int i = 0; i < n; i++) {                                                          // single scan to compute la
         la[i] = (la[i] < i || la[i] == UINT_MAX) ? 1 : la[i] - i;
         if (debug) {
             print_lyndon_array(la, n, i);
         }
     }
 
-    stop_timer();
+    stop_timer();                                                                                   // everything below is not part of the algorithm
 
-    // output the result
-    if (output) {
-        print_suffix_array(sa, n, -1);
-        print_lyndon_array(la, n, -1);
-    }
-
-    if (output) {
-        printf("Max. recursion depth=%i\n", depthr);
-    }
-
-    if (test) {
-        int test_res = test_suffix_array(t, sa, alphabet, n, a);
-        printf(test_res ? "Suffix array is correct\n" : "Suffix array is incorrect\n");
-        test_res = test_lyndon_array(t, la, alphabet, n, a);                                              
-        printf(test_res ? "Lyndon array is correct\n" : "Lyndon array is incorrect\n");
-    }
-
-    printf("Working space: %zu bytes + %zu bytes (bkt-array) + %zu bytes (alphabet)\n", max_memory, max_bkt_memory, max_alphabet_memory);
-    printf("Working space per input byte: %zu \n", (max_memory + max_bkt_memory + max_alphabet_memory) / (size_t) n);
+    print_results(t, la, sa, n, a, depthr);
 
     // Free memory
     free(bkt);

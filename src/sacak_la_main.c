@@ -4,6 +4,7 @@
 #include "sacak_la.h"
 #include "symbols.h"
 #include "test.h"
+//#include "psapi.h"
 
 extern int debug;
 extern int output;
@@ -17,8 +18,10 @@ int main(int argc, char** argv) {
     int gen_input = 0;
     int gen_input_len = 0;
     int mode = -1;
+    int write = 0;
     const char* input_file = NULL;
     const char* alphabet_file = NULL;
+    const char* write_file = NULL;
 
     if (argc == 1) {
         printf("Since no input file is specified, a default example will be used. For further information, use -h\n");
@@ -38,10 +41,11 @@ int main(int argc, char** argv) {
                 printf("-a <arg>: specify the path <arg> to the alphabet file if wanted, default is ascii\n");
                 printf("-d      : show debug output, not recommended for inputs larger than 200 byte\n");
                 printf("-o      : show the output on the terminal, not recommended for large inputs\n");
-                printf("-g <arg>: generate input with size <arg> (integer), only used for testing - might have bugs\n");
+                //printf("-g <arg>: generate input with size <arg> (integer), only used for testing - might have bugs\n");
                 printf("-m <arg>: specify the algorithm (1 = inplace, 2 = single aux. array, 3 = two aux. array, 4 = sacak only),\n");
                 printf("          default is all three versions of SACA-K+LA\n");
-                printf("-t      : test result (sa, la) for correctness, may take a while for large inputs\n");
+                printf("-t      : test result (sa, la) for correctness, may take a long time for large inputs\n");
+                printf("-w <arg>: write the output (Lyndon array) into the file at <arg> in CSV format\n");
                 printf("\nCombined options (eg. -doh) do not work, they have to separated by spaces\n");
                 exit(0);
             case 'i' :                                                                              // i -> input file directory
@@ -89,6 +93,15 @@ int main(int argc, char** argv) {
             case 't' :                                                                              // t -> test result
                 test = 1;
                 break;
+            case 'w' :
+                if (i + 1 >= argc) {
+                    printf("Option -w needs a file path as parameter\n");
+                    exit(0);
+                }
+                write_file = argv[i+1];
+                write = 1;
+                i++;
+                break;
 
         }
     }
@@ -131,11 +144,10 @@ int main(int argc, char** argv) {
     unsigned int* text = NULL;
     size_t text_size = 50;
 
-    // onyl for testing maybe remove?
     if (gen_input) {
         text = gen_test_string(proc_alphabet, gen_input_len, alphabet_size);
     } else {
-        FILE* file_text = file_open(input_file == NULL ? "../src/tmp.txt" : input_file, "r");
+        FILE* file_text = file_open(input_file == NULL ? "../src/tmp.txt" : input_file, "rb");
         text = file_read_d_term(file_text);
         text_size = file_size(file_text) + 1; // $-symbol
         file_close(file_text);
@@ -166,14 +178,6 @@ int main(int argc, char** argv) {
         debug = 0;
         printf("\nSACA-K only:\n");
         sacak(text, proc_alphabet, text_size, get_alphabet_size());
-        runtime = get_timer();
-        printf("Running time: %.4lf s\n", runtime);
-        if (runtime == .0f) {
-            printf("Running time too small to get accurate values for running time per input byte\n");
-        } else {
-            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-                (double) ((runtime / text_size) * (1000 * 1000)));
-        }
         debug = debug_restore;
     }
 
@@ -188,15 +192,11 @@ int main(int argc, char** argv) {
         debug = 0;
         printf("\nSACA-K+LA with no auxilliary array:\n");
         la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
-        free(la);
-        runtime = get_timer();
-        printf("Running time: %.4lf s\n", runtime);
-        if (runtime == .0f) {
-            printf("Running time too small to get accurate values for running time per input byte\n");
-        } else {
-            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-                (double) ((runtime / text_size) * (1000 * 1000)));
+        if (write) {
+            file_write(write_file, la, text_size);
+            printf("Output written into %s\n", write_file);
         }
+        free(la);
         debug = debug_restore;
     }
 
@@ -211,15 +211,11 @@ int main(int argc, char** argv) {
         debug = 0;
         printf("\nSACA-K+LA with one auxilliary array:\n");
         la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
-        free(la);
-        runtime = get_timer();
-        printf("Running time: %.4lf s\n", runtime);
-        if (runtime == .0f) {
-            printf("Running time too small to get accurate values for running time per input byte\n");
-        } else {
-            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-                (double) ((runtime / text_size) * (1000 * 1000)));
+        if (write) {
+            file_write(write_file, la, text_size);
+            printf("Output written into %s\n", write_file);
         }
+        free(la);
         debug = debug_restore;
     }
 
@@ -234,15 +230,11 @@ int main(int argc, char** argv) {
         debug = 0;
         printf("\nSACA-K+LA with two auxilliary arrays:\n");
         la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());
-        free(la);
-        runtime = get_timer();
-        printf("Running time: %.4lf s\n", runtime);
-        if (runtime == .0f) {
-            printf("Running time too small to get accurate values for running time per input byte\n");
-        } else {
-            printf("Running time per input byte: %.15lf ms or %.15lf \xE6s\n", (double) ((runtime / text_size) * 1000), 
-                (double) ((runtime / text_size) * (1000 * 1000)));
+        if (write) {
+            file_write(write_file, la, text_size);
+            printf("Output written into %s\n", write_file);
         }
+        free(la);
         debug = debug_restore;
     }
 
