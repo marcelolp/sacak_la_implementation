@@ -17,7 +17,7 @@ Following options are implemented:\
 Combined options (eg. -doh) do not work, they have to separated by spaces
 
 To compile the source code using GNU make, run the following line inside the main project folder. \
-The binary files can then be found in the ...\bin folder.
+The binary files can then be found in the ...\bin folder. If there is no ...\bin folder it has to be created beforehand.
 
 	C:\...> make	
 
