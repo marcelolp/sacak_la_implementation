@@ -37,6 +37,7 @@ size_t get_alphabet_size();
 *  the strings are expected to be terminated by /0 and to be called with &t1[i], &t2[j] to compare 
 *  from i, j onward
 *  Returns 1 if the first string is lexicographically larger, 0 if they are equal and -1 otherwise
+*  Unused
 */
 int lex_compare_strings( unsigned char* a,  unsigned char* b);
 

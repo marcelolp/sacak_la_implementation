@@ -9,19 +9,28 @@ Following options are implemented:\
 -a &ltarg>&nbsp;&nbsp; : specify the path &ltarg> to the alphabet file if wanted, default is ascii </br>
 -d &emsp;&emsp;&emsp;&nbsp; : show debug output, not recommended for inputs larger than 200 byte </br>
 -o &emsp;&emsp;&emsp;&nbsp; : show the output on the terminal, not recommended for large inputs </br>
--g &ltarg>&nbsp; : generate input with size &ltarg> (integer), only used for testing - might have bugs </br>
 -m &ltarg> : specify the algorithm (1 = inplace, 2 = single aux. array, 3 = two aux. array, 4 = only sacak), </br>
 &ensp;&ensp;&ensp;&emsp;&emsp;&emsp;          default is all three versions of SACA-K+LA </br>
--t &emsp;&emsp;&emsp;&nbsp; : test result (sa, la) for correctness, may take a while for large inputs </ul>
+-t &emsp;&emsp;&emsp;&nbsp; : test result (sa, la) for correctness, may take a while for large inputs </br>
+-w &ltarg>&nbsp;&nbsp; : write the output (Lyndon array only) into the file at &ltarg> in CSV format </ul>
 	
 Combined options (eg. -doh) do not work, they have to separated by spaces
 
-To compile the source code use the following line inside the ...\src folder (GNU make required).\
-The binary files can then be found in the ...\src\bin folder.
+To compile the source code using GNU make, run the following line inside the main project folder. \
+The binary files can then be found in the ...\bin folder.
 
-	C:\...\src> make	
+	C:\...> make	
 
-To redo the experiments from the thesis use the following line inside the ...\src\bin folder (where \<arg\> has to be replaced accordingly):
+To compile the source code without the makefile, run the following line inside the ...\src folder  \
+using the Visual Studio Command Prompt (normal command prompt will not work) 
+
+	C:\...\src> cl sacak_la_main.c file_io.c test.c sacak_la.c symbols.c
+
+and move the resulting .exe file to ...\bin \
+
+
+To redo the experiments from the thesis use the following line inside the ...\bin folder  \ 
+(where \<arg\> has to be replaced accordingly):
 
 	C:\...\bin> sacak_la_implementation -m <arg> -i <arg>
 

@@ -4,7 +4,6 @@
 #include "sacak_la.h"
 #include "symbols.h"
 #include "test.h"
-//#include "psapi.h"
 
 extern int debug;
 extern int output;
@@ -19,9 +18,11 @@ int main(int argc, char** argv) {
     int gen_input_len = 0;
     int mode = -1;
     int write = 0;
+    size_t text_size = 50;
     const char* input_file = NULL;
     const char* alphabet_file = NULL;
     const char* write_file = NULL;
+    unsigned int* text = NULL;
 
     if (argc == 1) {
         printf("Since no input file is specified, a default example will be used. For further information, use -h\n");
@@ -108,6 +109,7 @@ int main(int argc, char** argv) {
 
     printf("\n---------------------------------------------------------------------------------\n");
 
+    // Load alphabet file if necessary
     size_t alphabet_size = 255;
     if (alphabet_file != NULL) {
         FILE* file_alphabet = file_open(alphabet_file == NULL ? "../src/alphabet.txt" : alphabet_file, "r");
@@ -129,6 +131,7 @@ int main(int argc, char** argv) {
 
     unsigned char* proc_alphabet = get_alphabet();
 
+    // print out the value assignement of the alphabet if necessary
     if (debug) {
         printf("Assigned values: ");
         for (int i = 0; i < 255; i++) {
@@ -141,9 +144,7 @@ int main(int argc, char** argv) {
         printf("\n\n");
     }
 
-    unsigned int* text = NULL;
-    size_t text_size = 50;
-
+    // generate random input if necessary
     if (gen_input) {
         text = gen_test_string(proc_alphabet, gen_input_len, alphabet_size);
     } else {
@@ -153,6 +154,7 @@ int main(int argc, char** argv) {
         file_close(file_text);
     }
 
+    // print out the input if necessary
     if (output || debug) {
         printf("\nT:  ");
         for (int i = 0; i < text_size; i++) {
@@ -169,6 +171,7 @@ int main(int argc, char** argv) {
     double runtime = 0;
     int debug_restore = debug;
     
+    // sacak only
     if (mode  == 4) {
         if (debug) {
             sacak(text, proc_alphabet, text_size, get_alphabet_size());
@@ -181,6 +184,7 @@ int main(int argc, char** argv) {
         debug = debug_restore;
     }
 
+    // sacak-la inplace
     if (mode == -1 || mode  == 1) {
         if (debug) {
             la = sacak_la_inplace(text, proc_alphabet, text_size, get_alphabet_size());
@@ -200,6 +204,7 @@ int main(int argc, char** argv) {
         debug = debug_restore;
     }
 
+    // sacak-la one aux. array
     if (mode == -1 || mode  == 2) {
         if (debug) {
             la = sacak_la_one_aux(text, proc_alphabet, text_size, get_alphabet_size());
@@ -219,6 +224,7 @@ int main(int argc, char** argv) {
         debug = debug_restore;
     }
 
+    // sacak-la two aux. array
     if (mode == -1 || mode  == 3) {
         if (debug) {
             la = sacak_la_two_aux(text, proc_alphabet, text_size, get_alphabet_size());

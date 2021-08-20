@@ -150,11 +150,11 @@ void get_bkt_array(unsigned int* t, unsigned int* bkt, unsigned char* alphabet, 
 
 /*
 *  Recursively computes SA, intial call with depth=0, n=0
+*  Induced sorting of the LMS-type suffixes, based on the algorithm published by Nong et al. in 
+*  "Two efficient algorithms for linear time suffixarray construction" (accessed with IEEE)
 */
 int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet, 
                 size_t n, size_t a, int depth) {
-    // Induced sorting of the LMS-type suffixes, based on the algorithm published by Nong et al. in 
-    // "Two efficient algorithms for linear time suffixarray construction" (access with IEEE)
 
     // In the steps, the constant UINT_MAX will be used to represent -1 which is equivalent
     // for int->uint: -1 = -1 mod UINT_MAX = UINT_MAX
@@ -289,7 +289,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             } else {
                 cur_lms_len = 1;
             } 
-            //printf("LMS-SS at t[%u] has length %u", cur_lms_pos, cur_lms_len);
+
             int is_different = 0;
             if (last_lms_len != cur_lms_len) {                                                      // both LMS-substrings are for sure different
                 is_different = 1;
@@ -330,7 +330,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         }
 
         if (debug) {
-                print_suffix_array(sa, n, n - n1);
+            print_suffix_array(sa, n, n - n1);
         }
         
         //printf("\n\nDepth: %u\n", depth);
@@ -338,7 +338,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         //print_suffix_array(sa, n, -1);
 
 
-        // step 2.3: test if every character in t1 is unique
+        // step 2.3: test if every character in t1 is unique and go into recursion if needed
         int is_unique = (name_counter < n1) ? 0 : 1;
 
         if (debug) {
@@ -348,9 +348,8 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         unsigned int* t1 = sa + n - n1;
         unsigned int* sa1 = sa;
         int depthr = 0;
-        //if (depth == 6) print_suffix_array(t1, n1, -1);
+
         if (is_unique) {
-            // TODO: Get sa1 directly from t1 
             for (unsigned int i = 0; i < n1; i++) {                                                      
                 sa1[t1[i]] = i;
             }
@@ -358,7 +357,6 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
                 print_suffix_array(sa, n, n1);
             }
         } else {
-            // TODO: Get sa1 by recursion with sa1 := sa[0..n-n1-1], t1 := sa[n-n1-1..n-1]
             free(bkt);
             depthr = sacak_rec(t1, sa1, alphabet, n1, name_counter, depth + 1);                     // n-n1 =: length of sa1, n1 =: length of t1
             
@@ -586,7 +584,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         } else {
             cur_lms_len = 1;
         }
-        //printf("LMS-SS at t[%u] has length %u", cur_lms_pos, cur_lms_len);
+
         int is_different = 0;
         if (last_lms_len != cur_lms_len) {                                                          // both LMS-substrings are for sure different
             is_different = 1;
@@ -629,7 +627,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         print_suffix_array(sa, n, n - n1);
     }
 
-    // step 2.3: test if every character in t1 is unique
+    // step 2.3: test if every character in t1 is unique and go into recursion if needed
     int is_unique = (name_counter < n1) ? 0 : 1;
 
     if (debug) {
@@ -641,7 +639,6 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
     int depthr = 0;
     
     if (is_unique) {
-        // TODO: Get sa1 directly from t1 
         for (unsigned int i = 0; i < n1; i++) {                                                          
             sa1[t1[i]] = i;
         }
@@ -649,7 +646,6 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
             print_suffix_array(sa, n, n1-1);
         }
     } else {
-        // TODO: Get sa1 by recursion with sa1 := sa[0..n-n1-1], t1 := sa[n-n1-1..n-1]
         free(bkt);
         int temp = ascii;
         ascii = 1;                                                                                  // dont use the alphabet conversion for this part
@@ -731,7 +727,7 @@ int sacak_rec(unsigned int* t, unsigned int* sa, unsigned char* alphabet,
         }
     }
 
-    // step 3.3 is in the calling method
+    // step 3.3 is implemented in the calling method
     free(bkt);
     // return max recursion depth
     return (depthr != 0 ? depthr : 0);

@@ -6,7 +6,7 @@ int ascii = 0;
 void set_alphabet( unsigned char* a, size_t a_size) {
     
     // Use alphabet a and insert termination symbol $ at lowest index
-    alphabet = (unsigned char*) malloc((256) * sizeof(unsigned char));                                                 // alphabet array has size 256
+    alphabet = (unsigned char*) malloc((256) * sizeof(unsigned char));                              // alphabet array has size 256
     if (!alphabet) {
         perror("malloc: ");
         printf("Could not allocate memory for alphabet array");
@@ -82,7 +82,7 @@ int lex_compare_strings( unsigned char* a,  unsigned char* b) {
 }
 
 int lex_compare_symbols(unsigned int a, unsigned int b) {
-    if (ascii) {                                                                                    // works for '$' too as it has lower value than every other (reasonable) symbol
+    if (ascii) {                                                                                    
         if (a > b) {
             return 1;
         } else if (a == b) {
